@@ -7,5 +7,5 @@ if [[ "$#" -ne "1" ]]; then echo "Requires device name (e.g. nvme2n2) argument" 
 DEV=$1
 export $DEV
 
-sudo ../get_device_info $DEV
-sudo ./fio_bandwidth $DEV
+../get_device_info
+./fio_bandwidth $DEV
