@@ -5,7 +5,18 @@ set -e
 if [[ "$#" -ne "1" ]]; then echo "Requires device name (e.g. nvme2n2) argument" && exit; fi
 
 DEV=$1
-export $DEV
+export DEV
 
-../get_device_info
+# Get the device information
+DEV_INFO=($(../get_device_info))
+
+DEV_ZONE_CAP=${DEV_INFO[0]}
+DEV_ZONE_SIZE=${DEV_INFO[1]}
+DEV_ZONES=${DEV_INFO[2]}
+DEV_MAX_ACTIVE_ZONES=${DEV_INFO[3]}
+
+export DEV_ZONE_CAP
+export DEV_ZONE_SIZE
+export DEV_ZONES
+export DEV_MAX_ACTIVE_ZONES
 ./fio_bandwidth $DEV

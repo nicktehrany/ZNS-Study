@@ -2,10 +2,11 @@
 
 set -e
 
-DEV_CAP=$(nvme zns report-zones /dev/$DEV -d 1 | grep -o 'Cap:.*$' | awk '{print strtonum($2)*512}')
-DEV_ZONES=$(cat /sys/block/$DEV/queue/nr_zones)
-DEV_ACTIVE_ZONES=$(cat /sys/block/$DEV/queue/max_active_zones)
+if [[ -z "$DEV" ]]; then echo "Missing Device name" && exit; fi
 
-export $DEV_CAP
-export $DEV_ZONES
-export $DEV_ACTIVE_ZONES
+DEV_CAP=$(nvme zns report-zones /dev/$DEV -d 1 | grep -o 'Cap:.*$' | awk '{print strtonum($2)}')
+DEV_ZONE_SIZE=$(cat /sys/block/$DEV/queue/chunk_sectors)
+DEV_ZONES=$(cat /sys/block/$DEV/queue/nr_zones)
+DEV_MAX_ACTIVE_ZONES=$(cat /sys/block/$DEV/queue/max_active_zones)
+
+echo $DEV_CAP $DEV_ZONE_SIZE $DEV_ZONES $DEV_MAX_ACTIVE_ZONES

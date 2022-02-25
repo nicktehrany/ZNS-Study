@@ -5,13 +5,20 @@ set -e
 if [[ "$#" -ne "1" ]]; then echo "Requires device name (e.g. nvme2n2) argument" && exit; fi
 
 DATA_DIR=data
-
 QUEUE_DEPTHS=(1 2 4 8 16 32 64 128 256 512 1024)
+SIZE=$(echo "scale=0;$DEV_ZONE_CAP*512*$DEV_ZONES" | bc)
 
 mkdir -p $DATA_DIR
-echo $DEV_CAP
+cd $DATA_DIR
 
 for depth in ${QUEUE_DEPTHS[@]}; do
-    echo $depth
-    # Run each benchmark another for each bench type
+    echo "Running benchmarks with Queue Depth: $depth"
+    blkzone reset /dev/$DEV # make sure ns is empty
+    fio --name=$(echo "${DEV}_randwrite_512B_queue-depth-${depth}") --output=$(echo "${DEV}_randwrite_512B_queue-depth-${depth}") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --zonemode=zbd --iodepth=$depth --rw=randwrite --bs=512 --max_open_zones=$DEV_MAX_ACTIVE_ZONES
+    blkzone reset /dev/$DEV # make sure ns is empty
+    fio --name=$(echo "${DEV}_write_512B_queue-depth-${depth}") --output=$(echo "${DEV}_write_512B_queue-depth-${depth}") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --zonemode=zbd --iodepth=$depth --rw=write --bs=512
+    fio --name=$(echo "${DEV}_read_512B_queue-depth-${depth}") --output=$(echo "${DEV}_read_512B_queue-depth-${depth}") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --zonemode=zbd --iodepth=$depth --rw=read --bs=512
+    fio --name=$(echo "${DEV}_randread_512B_queue-depth-${depth}") --output=$(echo "${DEV}_randread_512B_queue-depth-${depth}") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --zonemode=zbd --iodepth=$depth --rw=randread --bs=512
+    fio --name=$(echo "${DEV}_overwrite-seq_512B_queue-depth-${depth}") --output=$(echo "${DEV}_overwrite-seq_512B_queue-depth-${depth}") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --zonemode=zbd --iodepth=$depth --rw=write --bs=512
+    fio --name=$(echo "${DEV}_overwrite-rand_512B_queue-depth-${depth}") --output=$(echo "${DEV}_overwrite-rand_512B_queue-depth-${depth}") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --zonemode=zbd --iodepth=$depth --rw=randwrite --bs=512 --max_open_zones=$DEV_MAX_ACTIVE_ZONES
 done
