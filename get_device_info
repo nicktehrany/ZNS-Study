@@ -8,5 +8,6 @@ DEV_CAP=$(nvme zns report-zones /dev/$DEV -d 1 | grep -o 'Cap:.*$' | awk '{print
 DEV_ZONE_SIZE=$(cat /sys/block/$DEV/queue/chunk_sectors)
 DEV_ZONES=$(cat /sys/block/$DEV/queue/nr_zones)
 DEV_MAX_ACTIVE_ZONES=$(cat /sys/block/$DEV/queue/max_active_zones)
+DEV_SECT_SIZE=$(cat /sys/block/$DEV/queue/hw_sector_size)
 
-echo $DEV_CAP $DEV_ZONE_SIZE $DEV_ZONES $DEV_MAX_ACTIVE_ZONES
+echo $DEV_CAP $DEV_ZONE_SIZE $DEV_ZONES $DEV_MAX_ACTIVE_ZONES $DEV_SECT_SIZE
