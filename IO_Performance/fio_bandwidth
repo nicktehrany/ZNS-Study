@@ -8,11 +8,12 @@ DATA_DIR="data/bandwidth"
 QUEUE_DEPTHS=(1 2 4 8 16 32 64 128 256 512 1024)
 # fio would stop once ns is full hence we use zone size instead of capacity
 SIZE=$(echo "scale=0;$DEV_ZONE_SIZE*$DEV_SECT_SIZE*$DEV_ZONES" | bc)
-RUNTIME="10s"
-BS="4Ki"
+RUNTIME="5s"
+BS="4K"
+
 
 mkdir -p $DATA_DIR
-cd $DATA_DIR
+cd $DATA_DIR && rm -f *
 
 for depth in ${QUEUE_DEPTHS[@]}; do
     echo "Running benchmarks with Queue Depth: $depth"
