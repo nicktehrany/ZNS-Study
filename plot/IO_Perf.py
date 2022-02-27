@@ -1,40 +1,11 @@
 #! /usr/bin/python3
 
 import matplotlib.pyplot as plt
-import os
-import glob
-import json
 import math
 import numpy as np
 import matplotlib.patches as mpatches
 
-bw_data=dict()
-zone_data=dict()
-file_path = '/'.join(os.path.abspath(__file__).split('/')[:-1])
-datadir=f"{file_path}/data"
-queue_depths=[1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
-
-def parse_bw_data():
-    if os.listdir(f'{datadir}/bandwidth') == []: 
-        print("No data in directory")
-        exit
-
-    for file in glob.glob(f'{datadir}/bandwidth/*'): 
-        with open(file, 'r') as f:
-            for index, line in enumerate(f, 1):
-                # Removing all fio logs in json file by finding first {
-                if line.split()[0] == "{":
-                    rows = f.readlines()
-                    with open(os.path.join(os.getcwd(), "temp.json"), 'w+') as temp:
-                        temp.write(line)
-                        temp.writelines(rows)
-                    break
-        with open(os.path.join(os.getcwd(), "temp.json"), 'r') as temp:
-            bw_data[file]=dict()
-            bw_data[file] = json.load(temp)
-            os.remove(os.path.join(os.getcwd(), "temp.json"))
-
-def plot_bw():
+def plot_IO_Perf_bw(file_path, bw_data, queue_depths):
     bw_write = [None] * len(queue_depths)
     bw_randwrite = [None] * len(queue_depths)
     bw_read = [None] * len(queue_depths)
@@ -74,13 +45,12 @@ def plot_bw():
     ax.xaxis.set_ticklabels(queue_depths)
     ax.set_ylabel("Bandwidth (MiB/s)")
     ax.set_xlabel("I/O Queue Depth")
-    os.makedirs(f"{file_path}/figures", exist_ok=True)
     plt.savefig(f"{file_path}/figures/bandwidth.pdf", bbox_inches="tight")
     # plt.show()
     plt.clf()
     fig = ax = None
 
-def plot_lat():
+def plot_IO_Perf_lat(file_path, bw_data, queue_depths):
     median_randwrite = [None] * len(queue_depths)
     randwrite_iops = [None] * len(queue_depths)
     tail_randwrite = [None] * len(queue_depths)
@@ -120,12 +90,6 @@ def plot_lat():
     # ax.xaxis.set_ticklabels(queue_depths)
     ax.set_ylabel("Latency (usec)")
     ax.set_xlabel("IOPs")
-    os.makedirs(f"{file_path}/figures", exist_ok=True)
     plt.savefig(f"{file_path}/figures/loaded_latency.pdf", bbox_inches="tight")
     # plt.show()
     plt.clf()
-
-if __name__ == "__main__":
-    parse_bw_data()
-    plot_bw()
-    plot_lat()
