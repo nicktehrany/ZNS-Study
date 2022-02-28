@@ -3,10 +3,9 @@ import os
 import glob
 import json
 
-file_path = '/'.join(os.path.abspath(__file__).split('/')[:-1])
-
 def parse_fio_data(data_path, data):
-    if os.listdir(f'{file_path}/IO_Performance/data/{data_path}') == []: 
+    if not os.path.exists(f'{file_path}/IO_Performance/data/{data_path}') or \
+        os.listdir(f'{file_path}/IO_Performance/data/{data_path}') == []: 
         print(f"No data in {file_path}/IO_Performance/data/{data_path}")
         return 0 
 
@@ -21,7 +20,7 @@ def parse_fio_data(data_path, data):
                         temp.writelines(rows)
                     break
         with open(os.path.join(os.getcwd(), "temp.json"), 'r') as temp:
-            data[file]=dict()
+            data[file] = dict()
             data[file] = json.load(temp)
             os.remove(os.path.join(os.getcwd(), "temp.json"))
 
@@ -30,7 +29,8 @@ def parse_fio_data(data_path, data):
 if __name__ == "__main__":
     bw_data = dict()
     zone_data = dict()
-    queue_depths = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+    queue_depths = 2 ** np.arange(11)
+    zones = np.arange(1, 15, 1)
     file_path = '/'.join(os.path.abspath(__file__).split('/')[:-1])
 
     os.makedirs(f"{file_path}/figures", exist_ok=True)
@@ -39,5 +39,5 @@ if __name__ == "__main__":
         plot_IO_Perf_bw(file_path, bw_data, queue_depths)
         plot_IO_Perf_lat(file_path, bw_data, queue_depths)
 
-    if(parse_fio_data("zones", zone_data)):
-        plot_IO_Perf_act_zones(file_path, zone_data)
+    if(parse_fio_data("active_zones", zone_data)):
+        plot_IO_Perf_act_zones(file_path, zone_data, zones)

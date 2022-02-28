@@ -16,9 +16,12 @@ DEV_ZONES=${DEV_INFO[2]}
 DEV_MAX_ACTIVE_ZONES=${DEV_INFO[3]}
 DEV_SECT_SIZE=${DEV_INFO[4]}
 
+export DEV
 export DEV_ZONE_CAP
 export DEV_ZONE_SIZE
 export DEV_ZONES
 export DEV_MAX_ACTIVE_ZONES
 export DEV_SECT_SIZE
-./fio_bandwidth $DEV
+
+./fio_bandwidth
+./fio_active_zones

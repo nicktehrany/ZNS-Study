@@ -1,0 +1,28 @@
+#! /bin/bash
+
+set -e
+
+DATA_DIR="data/active_zones"
+SIZE=$(echo "scale=0;$DEV_ZONE_SIZE*$DEV_SECT_SIZE*$DEV_ZONES" | bc)
+ACTIZE_ZONES=($(seq 1 1 $DEV_MAX_ACTIVE_ZONES))
+QUEUE_DEPTH="32"
+RUNTIME="10m"
+BS="4K"
+
+mkdir -p $DATA_DIR
+cd $DATA_DIR && rm -f *
+
+# Run fio for each active zone setup
+for zones in ${ACTIZE_ZONES[@]}; do
+    echo "Running benchmarks with number of active zones: $zones"
+    blkzone reset /dev/$DEV # make sure ns is empty
+
+    fio --name=$(echo "${DEV}_randwrite_${BS}_active-zones-${zones}") --output=$(echo "${DEV}_randwrite_${BS}_active-zones-${zones}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --zonemode=zbd --iodepth=$QUEUE_DEPTH --rw=randwrite --bs=$BS --max_open_zones=$zones --runtime=$RUNTIME
+
+    # Fill entire ns for reading and overwrite
+    echo "Refilling entire namespace for read/overwrite benchs"
+    fio --name=zns-fio --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --zonemode=zbd --iodepth=4 --rw=write --bs=512K > /dev/null
+
+    fio --name=$(echo "${DEV}_randread_${BS}_active-zones-${zones}") --output=$(echo "${DEV}_randread_${BS}_active-zones-${zones}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --zonemode=zbd --iodepth=$QUEUE_DEPTH --rw=randread --bs=$BS --max_open_zones=$zones --runtime=$RUNTIME
+    fio --name=$(echo "${DEV}_randoverwrite_${BS}_active-zones-${zones}") --output=$(echo "${DEV}_randoverwrite_${BS}_active-zones-${zones}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --zonemode=zbd --iodepth=$QUEUE_DEPTH --rw=randwrite --bs=$BS --max_open_zones=$zones --runtime=$RUNTIME
+done

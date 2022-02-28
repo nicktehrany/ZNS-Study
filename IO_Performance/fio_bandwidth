@@ -2,8 +2,6 @@
 
 set -e
 
-if [[ "$#" -ne "1" ]]; then echo "Requires device name (e.g. nvme2n2) argument" && exit; fi
-
 DATA_DIR="data/bandwidth"
 QUEUE_DEPTHS=(1 2 4 8 16 32 64 128 256 512 1024)
 # fio would stop once ns is full hence we use zone size instead of capacity

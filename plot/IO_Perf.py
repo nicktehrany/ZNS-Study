@@ -90,15 +90,14 @@ def plot_IO_Perf_lat(file_path, data, queue_depths):
     plt.savefig(f"{file_path}/figures/loaded_latency.pdf", bbox_inches="tight")
     plt.clf()
 
-def plot_IO_Perf_act_zones(file_path, data):
-    zones = np.arange(1,15,1)
+def plot_IO_Perf_act_zones(file_path, data, zones):
     bw_randwrite = [None] * len(zones)
     bw_randread = [None] * len(zones)
     bw_randoverwrite = [None] * len(zones)
 
     for zone_count in zones:
         for key, value in data.items():
-            if '_randwrite_' in key and f'_{zone_count}-zones' in key:
+            if '_randwrite_' in key:
                 bw_randwrite[zone_count - 1] = value["jobs"][0]["write"]["bw_mean"]/1024
             if '_randread_' in key:
                 bw_randread[zone_count - 1] = value["jobs"][0]["read"]["bw_mean"]/1024
