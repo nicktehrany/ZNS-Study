@@ -6,7 +6,7 @@ DATA_DIR="data/active_zones"
 SIZE=$(echo "scale=0;$DEV_ZONE_SIZE*$DEV_SECT_SIZE*$DEV_ZONES" | bc)
 ACTIZE_ZONES=($(seq 1 1 $DEV_MAX_ACTIVE_ZONES))
 QUEUE_DEPTH="32"
-RUNTIME="10m"
+RUNTIME="5s"
 BS="4K"
 
 mkdir -p $DATA_DIR
