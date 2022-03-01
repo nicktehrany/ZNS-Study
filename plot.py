@@ -4,12 +4,12 @@ import glob
 import json
 
 def parse_fio_data(data_path, data):
-    if not os.path.exists(f'{file_path}/IO_Performance/data/{data_path}') or \
-        os.listdir(f'{file_path}/IO_Performance/data/{data_path}') == []: 
-        print(f"No data in {file_path}/IO_Performance/data/{data_path}")
+    if not os.path.exists(f'{data_path}') or \
+        os.listdir(f'{data_path}') == []: 
+        print(f"No data in {data_path}")
         return 0 
 
-    for file in glob.glob(f'{file_path}/IO_Performance/data/bandwidth/*'): 
+    for file in glob.glob(f'{data_path}/*'): 
         with open(file, 'r') as f:
             for index, line in enumerate(f, 1):
                 # Removing all fio logs in json file by finding first {
@@ -26,18 +26,28 @@ def parse_fio_data(data_path, data):
 
     return 1
 
-if __name__ == "__main__":
+def prep_IO_Perf(file_path):
     bw_data = dict()
     zone_data = dict()
     queue_depths = 2 ** np.arange(11)
     zones = np.arange(1, 15, 1)
+
+    for dir in glob.glob(f'{file_path}/IO_Performance/data/bandwidth/*'): 
+        dir = dir.split('/')[-1]
+        os.makedirs(f"{file_path}/figures/IO_Perf/{dir}", exist_ok=True)
+
+        if(parse_fio_data(f'{file_path}/IO_Performance/data/bandwidth/{dir}', bw_data)):
+            plot_IO_Perf_bw(f'{file_path}/figures/IO_Perf/{dir}', bw_data, queue_depths)
+            plot_IO_Perf_lat(f'{file_path}/figures/IO_Perf/{dir}', bw_data, queue_depths)
+
+    for dir in glob.glob(f'{file_path}/IO_Performance/data/active_zones/*'): 
+        dir = dir.split('/')[-1]
+        os.makedirs(f"{file_path}/figures/IO_Perf/{dir}", exist_ok=True)
+
+        if(parse_fio_data(f'{file_path}/IO_Performance/data/active_zones/{dir}', zone_data)):
+            plot_IO_Perf_act_zones(f'{file_path}/figures/IO_Perf/{dir}', zone_data, zones)
+
+
+if __name__ == "__main__":
     file_path = '/'.join(os.path.abspath(__file__).split('/')[:-1])
-
-    os.makedirs(f"{file_path}/figures", exist_ok=True)
-
-    if(parse_fio_data("bandwidth", bw_data)):
-        plot_IO_Perf_bw(file_path, bw_data, queue_depths)
-        plot_IO_Perf_lat(file_path, bw_data, queue_depths)
-
-    if(parse_fio_data("active_zones", zone_data)):
-        plot_IO_Perf_act_zones(file_path, zone_data, zones)
+    prep_IO_Perf(file_path)

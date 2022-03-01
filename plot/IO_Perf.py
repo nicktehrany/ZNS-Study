@@ -43,9 +43,10 @@ def plot_IO_Perf_bw(file_path, data, queue_depths):
     ax.legend(loc='best')
     ax.xaxis.set_ticks(np.arange(0,11,1))
     ax.xaxis.set_ticklabels(queue_depths)
+    ax.set_ylim(bottom=0)
     ax.set_ylabel("Bandwidth (MiB/s)")
     ax.set_xlabel("I/O Queue Depth")
-    plt.savefig(f"{file_path}/figures/bandwidth.pdf", bbox_inches="tight")
+    plt.savefig(f"{file_path}/bandwidth.pdf", bbox_inches="tight")
     plt.clf()
     fig = ax = None
 
@@ -62,7 +63,7 @@ def plot_IO_Perf_lat(file_path, data, queue_depths):
             median_randwrite[int(math.log2(int(value["jobs"][0]["job options"]["iodepth"])))] = value["jobs"][0]["write"]["clat_ns"]["mean"]/1000
             randwrite_iops[int(math.log2(int(value["jobs"][0]["job options"]["iodepth"])))] = value["jobs"][0]["write"]["iops"]
             tail_randwrite[int(math.log2(int(value["jobs"][0]["job options"]["iodepth"])))] = value["jobs"][0]["write"]["clat_ns"]["percentile"]["95.000000"]/1000
-        if '_randread_' in key:
+        elif '_randread_' in key:
             median_randread[int(math.log2(int(value["jobs"][0]["job options"]["iodepth"])))] = value["jobs"][0]["read"]["clat_ns"]["mean"]/1000
             randread_iops[int(math.log2(int(value["jobs"][0]["job options"]["iodepth"])))] = value["jobs"][0]["read"]["iops"]
             tail_randread[int(math.log2(int(value["jobs"][0]["job options"]["iodepth"])))] = value["jobs"][0]["read"]["clat_ns"]["percentile"]["95.000000"]/1000
@@ -85,9 +86,10 @@ def plot_IO_Perf_lat(file_path, data, queue_depths):
     ax.grid(which='major', linestyle='dashed', linewidth='1')
     ax.set_axisbelow(True)
     ax.legend(loc='best', handles=handles)
+    ax.set_ylim(bottom=0)
     ax.set_ylabel("Latency (usec)")
     ax.set_xlabel("IOPs")
-    plt.savefig(f"{file_path}/figures/loaded_latency.pdf", bbox_inches="tight")
+    plt.savefig(f"{file_path}/loaded_latency.pdf", bbox_inches="tight")
     plt.clf()
 
 def plot_IO_Perf_act_zones(file_path, data, zones):
@@ -95,14 +97,13 @@ def plot_IO_Perf_act_zones(file_path, data, zones):
     bw_randread = [None] * len(zones)
     bw_randoverwrite = [None] * len(zones)
 
-    for zone_count in zones:
-        for key, value in data.items():
-            if '_randwrite_' in key:
-                bw_randwrite[zone_count - 1] = value["jobs"][0]["write"]["bw_mean"]/1024
-            if '_randread_' in key:
-                bw_randread[zone_count - 1] = value["jobs"][0]["read"]["bw_mean"]/1024
-            if '_randoverwrite_' in key:
-                bw_randoverwrite[zone_count - 1] = value["jobs"][0]["write"]["bw_mean"]/1024
+    for key, value in data.items():
+        if '_randwrite_' in key:
+            bw_randwrite[int(value["jobs"][0]["job options"]["max_open_zones"]) - 1] = value["jobs"][0]["write"]["bw_mean"]/1024
+        elif 'randread_' in key:
+            bw_randread[int(value["jobs"][0]["job options"]["max_open_zones"]) - 1] = value["jobs"][0]["read"]["bw_mean"]/1024
+        elif '_randoverwrite_' in key:
+            bw_randoverwrite[int(value["jobs"][0]["job options"]["max_open_zones"]) - 1] = value["jobs"][0]["write"]["bw_mean"]/1024
 
     fig, ax = plt.subplots()
 
@@ -114,7 +115,8 @@ def plot_IO_Perf_act_zones(file_path, data, zones):
     ax.grid(which='major', linestyle='dashed', linewidth='1')
     ax.set_axisbelow(True)
     ax.legend(loc='best')
+    ax.set_ylim(bottom=0)
     ax.set_ylabel("Bandwidth (MiB/s)")
     ax.set_xlabel("Active Zones")
-    plt.savefig(f"{file_path}/figures/active_zones.pdf", bbox_inches="tight")
+    plt.savefig(f"{file_path}/active_zones.pdf", bbox_inches="tight")
     plt.clf()

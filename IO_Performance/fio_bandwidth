@@ -2,7 +2,7 @@
 
 set -e
 
-DATA_DIR="data/bandwidth"
+DATA_DIR="data/bandwidth/$DEV-$(date +"%Y_%m_%d_%I_%M_%p")"
 QUEUE_DEPTHS=(1 2 4 8 16 32 64 128 256 512 1024)
 
 # fio would stop once ns is full hence we use zone size instead of capacity
@@ -12,17 +12,6 @@ BS="4K"
 
 
 mkdir -p $DATA_DIR
-
-if [ $(ls -A "$DATA_DIR" | wc -l) -ne "0" ]; then
-    while true; do
-        read -p "$DATA_DIR contains data. Delete it? " yn
-        case $yn in
-            [Yy]* ) cd $DATA_DIR && rm -f *; break;;
-            [Nn]* ) exit;;
-            * ) echo "Please answer yes or no.";;
-        esac
-    done
-fi
 
 for depth in ${QUEUE_DEPTHS[@]}; do
     echo "Running benchmarks with Queue Depth: $depth"

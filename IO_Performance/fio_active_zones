@@ -2,7 +2,7 @@
 
 set -e
 
-DATA_DIR="data/active_zones"
+DATA_DIR="data/active_zones/$DEV-$(date +"%Y_%m_%d_%I_%M_%p")"
 SIZE=$(echo "scale=0;$DEV_ZONE_SIZE*$DEV_SECT_SIZE*$DEV_ZONES" | bc)
 ACTIZE_ZONES=($(seq 1 1 $DEV_MAX_ACTIVE_ZONES))
 QUEUE_DEPTH="32"
@@ -10,17 +10,6 @@ RUNTIME="30s"
 BS="4K"
 
 mkdir -p $DATA_DIR
-
-if [ $(ls -A "$DATA_DIR" | wc -l) -ne "0" ]; then
-    while true; do
-        read -p "$DATA_DIR contains data. Delete it? " yn
-        case $yn in
-            [Yy]* ) cd $DATA_DIR && rm -f *; break;;
-            [Nn]* ) exit;;
-            * ) echo "Please answer yes or no.";;
-        esac
-    done
-fi
 
 # Run fio for each active zone setup
 for zones in ${ACTIZE_ZONES[@]}; do
