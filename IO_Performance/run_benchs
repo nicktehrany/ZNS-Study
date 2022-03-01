@@ -26,5 +26,5 @@ export DEV_SECT_SIZE
 export DEV_SCHEDULER
 export DEV_NUMA_NODE
 
-# ./fio_bandwidth
-# ./fio_active_zones
+./fio_bandwidth
+./fio_active_zones

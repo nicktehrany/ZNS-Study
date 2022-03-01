@@ -61,34 +61,41 @@ def plot_IO_Perf_lat(file_path, data, queue_depths):
     for key, value in data.items():
         if '_randwrite_' in key:
             median_randwrite[int(math.log2(int(value["jobs"][0]["job options"]["iodepth"])))] = value["jobs"][0]["write"]["clat_ns"]["mean"]/1000
-            randwrite_iops[int(math.log2(int(value["jobs"][0]["job options"]["iodepth"])))] = value["jobs"][0]["write"]["iops"]
+            randwrite_iops[int(math.log2(int(value["jobs"][0]["job options"]["iodepth"])))] = value["jobs"][0]["write"]["iops"]/1000
             tail_randwrite[int(math.log2(int(value["jobs"][0]["job options"]["iodepth"])))] = value["jobs"][0]["write"]["clat_ns"]["percentile"]["95.000000"]/1000
         elif '_randread_' in key:
             median_randread[int(math.log2(int(value["jobs"][0]["job options"]["iodepth"])))] = value["jobs"][0]["read"]["clat_ns"]["mean"]/1000
-            randread_iops[int(math.log2(int(value["jobs"][0]["job options"]["iodepth"])))] = value["jobs"][0]["read"]["iops"]
+            randread_iops[int(math.log2(int(value["jobs"][0]["job options"]["iodepth"])))] = value["jobs"][0]["read"]["iops"]/1000
             tail_randread[int(math.log2(int(value["jobs"][0]["job options"]["iodepth"])))] = value["jobs"][0]["read"]["clat_ns"]["percentile"]["95.000000"]/1000
 
     fig, ax = plt.subplots()
 
-    ax.plot(randwrite_iops, median_randwrite, markersize=6, marker='x', color="orange")
-    ax.plot(randwrite_iops, tail_randwrite, markersize=6, marker='o', color="orange")
-    ax.plot(randread_iops, median_randread, markersize=6, marker='x', color="green")
-    ax.plot(randread_iops, tail_randread, markersize=6, marker='o', color="green")
+    ax.plot(randwrite_iops, median_randwrite, markersize=6, marker='x', label="median")
+    ax.plot(randwrite_iops, tail_randwrite, markersize=6, marker='o', label="95%")
+    # ax.plot(randread_iops, median_randwrite, markersize=6, marker='x', label="median")
+    # ax.plot(randread_iops, tail_randwrite, markersize=6, marker='o', label="95%")
+
+    # Commented out part for randwrite and randread in same plot
+    # ax.plot(randwrite_iops, median_randwrite, markersize=6, marker='x', color="orange")
+    # ax.plot(randwrite_iops, tail_randwrite, markersize=6, marker='o', color="orange")
+    # ax.plot(randread_iops, median_randread, markersize=6, marker='x', color="green")
+    # ax.plot(randread_iops, tail_randread, markersize=6, marker='o', color="green")
 
     # Creating the legend labels
-    handles = []
-    handles.append(mpatches.Patch(color="orange", label="randwrite"))
-    handles.append(mpatches.Patch(color="green", label="randread"))
-    handles.append(plt.Line2D([], [], color="black", marker="x", label="median"))
-    handles.append(plt.Line2D([], [], color="black", marker="o", label="95%"))
+    # handles = []
+    # handles.append(mpatches.Patch(color="orange", label="randwrite"))
+    # handles.append(mpatches.Patch(color="green", label="randread"))
+    # handles.append(plt.Line2D([], [], color="black", marker="x", label="median"))
+    # handles.append(plt.Line2D([], [], color="black", marker="o", label="95%"))
 
     fig.tight_layout()
     ax.grid(which='major', linestyle='dashed', linewidth='1')
     ax.set_axisbelow(True)
-    ax.legend(loc='best', handles=handles)
+    # ax.legend(loc='best', handles=handles)
+    ax.legend(loc='best')
     ax.set_ylim(bottom=0)
     ax.set_ylabel("Latency (usec)")
-    ax.set_xlabel("IOPs")
+    ax.set_xlabel("Throughput (KOP/sec)")
     plt.savefig(f"{file_path}/loaded_latency.pdf", bbox_inches="tight")
     plt.clf()
 
