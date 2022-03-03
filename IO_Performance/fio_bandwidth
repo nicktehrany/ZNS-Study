@@ -6,26 +6,36 @@ DATA_DIR="data/bandwidth/$DEV-$(date +"%Y_%m_%d_%I_%M_%p")"
 QUEUE_DEPTHS=(1 2 4 8 16 32 64 128 256 512 1024)
 
 # fio would stop once ns is full hence we use zone size instead of capacity
-SIZE=$(echo "scale=0;$DEV_ZONE_SIZE*$DEV_SECT_SIZE*$DEV_ZONES" | bc)
 RUNTIME="30s"
-BS="4K"
+BS="4Ki"
+RAMP_TIME="10s"
+ZONED_ARGS=""
+ZONED_RAND_ARGS=""
 
+if [[ "$ZONED" -eq "1" ]]; then
+    SIZE=$(echo "scale=0;$DEV_ZONE_SIZE*$DEV_SECT_SIZE*$DEV_ZONES" | bc)
+    ZONED_ARGS=" --zonemode=zbd "
+    ZONED_RAND_ARGS=" --max_open_zones=$DEV_MAX_ACTIVE_ZONES "
+else
+    SIZE=$(echo "scale=0;$DEV_SIZE*$DEV_SECT_SIZE" | bc)
+fi
 
 mkdir -p $DATA_DIR
+cd $DATA_DIR
 
 for depth in ${QUEUE_DEPTHS[@]}; do
     echo "Running benchmarks with Queue Depth: $depth"
-    blkzone reset /dev/$DEV # make sure ns is empty
-    fio --name=$(echo "${DEV}_randwrite_${BS}_queue-depth-${depth}") --output=$(echo "${DEV}_randwrite_${BS}_queue-depth-${depth}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --zonemode=zbd --iodepth=$depth --rw=randwrite --bs=$BS --max_open_zones=$DEV_MAX_ACTIVE_ZONES --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE
-    blkzone reset /dev/$DEV # make sure ns is empty
-    fio --name=$(echo "${DEV}_write_${BS}_queue-depth-${depth}") --output=$(echo "${DEV}_write_${BS}_queue-depth-${depth}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --zonemode=zbd --iodepth=$depth --rw=write --bs=$BS --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE
+    [[ "$ZONED" == "1" ]] && blkzone reset /dev/$DEV || nvme format /dev/$DEV -f # make sure ns is empty
+    fio --name=$(echo "${DEV}_randwrite_${BS}_queue-depth-${depth}") --output=$(echo "${DEV}_randwrite_${BS}_queue-depth-${depth}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --iodepth=$depth --rw=randwrite --bs=$BS --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE --ramp_time=$RAMP_TIME $ZONED_ARGS $ZONED_RAND_ARGS
+     [[ "$ZONED" == "1" ]] && blkzone reset /dev/$DEV || nvme format /dev/$DEV -f # make sure ns is empty
+    fio --name=$(echo "${DEV}_write_${BS}_queue-depth-${depth}") --output=$(echo "${DEV}_write_${BS}_queue-depth-${depth}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --iodepth=$depth --rw=write --bs=$BS --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE --ramp_time=$RAMP_TIME $ZONED_ARGS
 
     # Fill entire ns for reading
     echo "Refilling entire namespace for read benchs"
-    fio --name=zns-fio --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --zonemode=zbd --iodepth=4 --rw=write --bs=512K > /dev/null
+    fio --name=zns-fio --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --iodepth=4 --rw=write --bs=512K $ZONED_ARGS > /dev/null
 
-    fio --name=$(echo "${DEV}_read_${BS}_queue-depth-${depth}") --output=$(echo "${DEV}_read_${BS}_queue-depth-${depth}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --zonemode=zbd --iodepth=$depth --rw=read --bs=$BS --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE
-    fio --name=$(echo "${DEV}_randread_${BS}_queue-depth-${depth}") --output=$(echo "${DEV}_randread_${BS}_queue-depth-${depth}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --zonemode=zbd --iodepth=$depth --rw=randread --bs=$BS --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE
-    fio --name=$(echo "${DEV}_overwrite-seq_${BS}_queue-depth-${depth}") --output=$(echo "${DEV}_overwrite-seq_${BS}_queue-depth-${depth}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --zonemode=zbd --iodepth=$depth --rw=write --bs=$BS --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE
-    fio --name=$(echo "${DEV}_overwrite-rand_${BS}_queue-depth-${depth}") --output=$(echo "${DEV}_overwrite-rand_${BS}_queue-depth-${depth}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --zonemode=zbd --iodepth=$depth --rw=randwrite --bs=$BS --max_open_zones=$DEV_MAX_ACTIVE_ZONES --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE
+    fio --name=$(echo "${DEV}_read_${BS}_queue-depth-${depth}") --output=$(echo "${DEV}_read_${BS}_queue-depth-${depth}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --iodepth=$depth --rw=read --bs=$BS --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE --ramp_time=$RAMP_TIME $ZONED_ARGS
+    fio --name=$(echo "${DEV}_randread_${BS}_queue-depth-${depth}") --output=$(echo "${DEV}_randread_${BS}_queue-depth-${depth}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --iodepth=$depth --rw=randread --bs=$BS --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE --ramp_time=$RAMP_TIME $ZONED_ARGS
+    fio --name=$(echo "${DEV}_overwrite-seq_${BS}_queue-depth-${depth}") --output=$(echo "${DEV}_overwrite-seq_${BS}_queue-depth-${depth}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --iodepth=$depth --rw=write --bs=$BS --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE --ramp_time=$RAMP_TIME $ZONED_ARGS
+    fio --name=$(echo "${DEV}_overwrite-rand_${BS}_queue-depth-${depth}") --output=$(echo "${DEV}_overwrite-rand_${BS}_queue-depth-${depth}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --iodepth=$depth --rw=randwrite --bs=$BS --runtime=$RUNTIME  --numa_cpu_nodes=$DEV_NUMA_NODE --ramp_time=$RAMP_TIME $ZONED_ARGS $ZONED_RAND_ARGS
 done

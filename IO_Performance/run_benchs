@@ -5,26 +5,40 @@ set -e
 if [[ "$#" -ne "1" ]]; then echo "Requires device name (e.g. nvme2n2) argument" && exit; fi
 
 DEV=$1
+ZONED=0
 
-# Get the device information
-DEV_INFO=($(../get_device_info $DEV | awk 'NF{ print $NF }'))
+if [[ "$(cat /sys/block/$DEV/queue/zoned)" == "host-managed" ]]; then
+    # Get the device information
+    DEV_INFO=($(../get_zoned_device_info $DEV | awk 'NF{ print $NF }'))
 
-DEV_ZONE_CAP=${DEV_INFO[0]}
-DEV_ZONE_SIZE=${DEV_INFO[1]}
-DEV_ZONES=${DEV_INFO[2]}
-DEV_MAX_ACTIVE_ZONES=${DEV_INFO[3]}
-DEV_SECT_SIZE=${DEV_INFO[4]}
-DEV_SCHEDULER=${DEV_INFO[5]}
-DEV_NUMA_NODE=${DEV_INFO[6]}
+    DEV_ZONE_CAP=${DEV_INFO[0]}
+    DEV_ZONE_SIZE=${DEV_INFO[1]}
+    DEV_ZONES=${DEV_INFO[2]}
+    DEV_MAX_ACTIVE_ZONES=${DEV_INFO[3]}
+    DEV_SECT_SIZE=${DEV_INFO[4]}
+    DEV_SCHEDULER=${DEV_INFO[5]}
+    DEV_NUMA_NODE=${DEV_INFO[6]}
+    ZONED=1
+
+    export DEV_ZONE_CAP
+    export DEV_ZONE_SIZE
+    export DEV_ZONES
+    export DEV_MAX_ACTIVE_ZONES
+    export DEV_SCHEDULER
+else
+    # Device is not zoned device
+    DEV_SECT_SIZE=$(cat /sys/block/$DEV/queue/hw_sector_size)
+    DEV_NUMA_NODE=$(cat /sys/block/$DEV/device/numa_node)
+    DEV_SIZE=$(cat /sys/block/$DEV/size)
+    ZONED=0
+
+    export DEV_SIZE
+fi
 
 export DEV
-export DEV_ZONE_CAP
-export DEV_ZONE_SIZE
-export DEV_ZONES
-export DEV_MAX_ACTIVE_ZONES
+export ZONED
 export DEV_SECT_SIZE
-export DEV_SCHEDULER
 export DEV_NUMA_NODE
 
-./fio_bandwidth
-./fio_active_zones
+numactl -m $DEV_NUMA_NODE ./fio_bandwidth
+# [[ "$ZONED" == "1" ]] && numactl -m $DEV_NUMA_NODE ./fio_active_zones || "Can only run fio_active_zones with a zoned device"
