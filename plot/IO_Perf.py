@@ -147,3 +147,57 @@ def plot_IO_Perf_act_zones(file_path, data, zones):
     ax.set_xlabel("Active Zones")
     plt.savefig(f"{file_path}/active_zones.pdf", bbox_inches="tight")
     plt.clf()
+
+def plot_IO_Perf_bw(file_path, data, block_sizes):
+    bw_write = [None] * len(block_sizes)
+    bw_randwrite = [None] * len(block_sizes)
+    bw_read = [None] * len(block_sizes)
+    bw_randread = [None] * len(block_sizes)
+    bw_overwrite = [None] * len(block_sizes)
+    bw_overwrite_rand = [None] * len(block_sizes)
+
+    for key, value in data.items():
+        if '_write_' in key:
+        # -12 as we are starting at 4K = 2^12 and map that to array index 0 and [:-2] to drop the K from 4K bs and multiply by 1024 for K value
+            bw_write[int(math.log2(int(value["jobs"][0]["job options"]["bs"][:-2])*1024)) - 12] = value["jobs"][0]["write"]["bw_mean"]/1024
+        elif '_randwrite_' in key:
+            bw_randwrite[int(math.log2(int(value["jobs"][0]["job options"]["bs"][:-2])*1024)) - 12] = value["jobs"][0]["write"]["bw_mean"]/1024
+        elif '_read_' in key:
+            print(value["jobs"][0]["job options"]["bs"][:-2]) 
+            bw_read[int(math.log2(int(value["jobs"][0]["job options"]["bs"][:-2])*1024)) - 12] = value["jobs"][0]["read"]["bw_mean"]/1024
+        elif '_randread_' in key:
+            bw_randread[int(math.log2(int(value["jobs"][0]["job options"]["bs"][:-2])*1024)) - 12] = value["jobs"][0]["read"]["bw_mean"]/1024
+        elif '_overwrite-seq_' in key:
+            bw_overwrite[int(math.log2(int(value["jobs"][0]["job options"]["bs"][:-2])*1024)) - 12] = value["jobs"][0]["write"]["bw_mean"]/1024
+        elif '_overwrite-rand_' in key:
+            bw_overwrite_rand[int(math.log2(int(value["jobs"][0]["job options"]["bs"][:-2])*1024)) - 12] = value["jobs"][0]["write"]["bw_mean"]/1024
+
+    fig, ax = plt.subplots()
+    print(bw_write)
+    print(bw_randwrite)
+    print(bw_read)
+    print(bw_randread)
+    print(bw_overwrite)
+    print(bw_overwrite_rand)
+
+    xticks=np.arange(0,6,1)
+    ax.plot(xticks, bw_write, markersize=4, marker='x', label="write_seq")
+    ax.plot(xticks, bw_randwrite, markersize=4, marker='o', label="write_rand")
+    ax.plot(xticks, bw_read, markersize=4, marker='v', label="read_seq")
+    ax.plot(xticks, bw_randread, markersize=4, marker='^', label="read_rand")
+    ax.plot(xticks, bw_overwrite, markersize=4, marker='<', label="overwrite_seq")
+    ax.plot(xticks, bw_overwrite_rand, markersize=4, marker='>', label="overwrite_rand")
+    
+    fig.tight_layout()
+    ax.grid(which='major', linestyle='dashed', linewidth='1')
+    ax.set_axisbelow(True)
+    ax.legend(loc='best')
+    ax.xaxis.set_ticks(xticks)
+    block_labels = [x[:-2] for x in block_sizes]
+    ax.xaxis.set_ticklabels(block_labels)
+    ax.set_ylim(bottom=0)
+    ax.set_ylabel("Bandwidth (MiB/s)")
+    ax.set_xlabel("Block Size (KiB)")
+    plt.savefig(f"{file_path}/scaled_bandwidth.pdf", bbox_inches="tight")
+    plt.clf()
+    fig = ax = None

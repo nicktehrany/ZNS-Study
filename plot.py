@@ -29,7 +29,9 @@ def parse_fio_data(data_path, data):
 def prep_IO_Perf(file_path):
     bw_data = dict()
     zone_data = dict()
+    scaled_bw_data = dict()
     queue_depths = 2 ** np.arange(11)
+    block_sizes = ["4Ki", "8Ki", "16Ki", "32Ki", "64Ki", "128Ki"]
     zones = np.arange(1, 15, 1)
 
     for dir in glob.glob(f'{file_path}/IO_Performance/data/throughput/*'): 
@@ -46,6 +48,13 @@ def prep_IO_Perf(file_path):
 
         if(parse_fio_data(f'{file_path}/IO_Performance/data/active_zones/{dir}', zone_data)):
             plot_IO_Perf_act_zones(f'{file_path}/figures/IO_Perf/{dir}', zone_data, zones)
+
+    for dir in glob.glob(f'{file_path}/IO_Performance/data/scaled_bandwidth/*'): 
+        dir = dir.split('/')[-1]
+        os.makedirs(f"{file_path}/figures/IO_Perf/{dir}", exist_ok=True)
+
+        if(parse_fio_data(f'{file_path}/IO_Performance/data/scaled_bandwidth/{dir}', scaled_bw_data)):
+            plot_IO_Perf_bw(f'{file_path}/figures/IO_Perf/{dir}', scaled_bw_data, block_sizes)
 
 
 if __name__ == "__main__":

@@ -53,5 +53,5 @@ export DEV_NUMA_NODE
 export PARTITION
 
 # numactl -m $DEV_NUMA_NODE ./fio_throughput
-numactl -m $DEV_NUMA_NODE ./fio_scaled_throughput
+numactl -m $DEV_NUMA_NODE ./fio_scaled_bandwidth
 # [[ "$ZONED" == "1" ]] && numactl -m $DEV_NUMA_NODE ./fio_active_zones || "Can only run fio_active_zones with a zoned device"
