@@ -6,8 +6,19 @@ if [[ "$#" -ne "1" ]]; then echo "Requires device name (e.g. nvme2n2) argument" 
 
 DEV=$1
 ZONED=0
+PARTITION=0
 
-if [[ "$(cat /sys/block/$DEV/queue/zoned)" == "host-managed" ]]; then
+if [[ ! -z "$(echo $DEV | grep -E 'nvme[0-9]+n[0-9]+p[0-9]+')" ]]; then
+    # Using parition instead of namespace, have to find info differently
+    DEV_SECT_SIZE=$(cat /sys/block/$(echo "$DEV" | sed 's/p[0-9]*//')/queue/hw_sector_size)
+    DEV_NUMA_NODE=$(cat /sys/block/$(echo "$DEV" | sed 's/p[0-9]*//')/device/numa_node)
+    DEV_SIZE=$(cat /sys/block/$(echo "$DEV" | sed 's/p[0-9]*//')/$DEV/size)
+    ZONED=0
+    PARTITION=1
+
+    export DEV_SIZE
+
+elif [[ "$(cat /sys/block/$DEV/queue/zoned)" == "host-managed" ]]; then
     # Get the device information
     DEV_INFO=($(../get_zoned_device_info $DEV | awk 'NF{ print $NF }'))
 
@@ -39,6 +50,7 @@ export DEV
 export ZONED
 export DEV_SECT_SIZE
 export DEV_NUMA_NODE
+export PARTITION
 
 numactl -m $DEV_NUMA_NODE ./fio_bandwidth
 # [[ "$ZONED" == "1" ]] && numactl -m $DEV_NUMA_NODE ./fio_active_zones || "Can only run fio_active_zones with a zoned device"
