@@ -5,7 +5,7 @@ import json
 
 def parse_fio_data(data_path, data):
     if not os.path.exists(f'{data_path}') or \
-        os.listdir(f'{data_path}') == []: 
+            os.listdir(f'{data_path}') == []: 
         print(f"No data in {data_path}")
         return 0 
 
@@ -32,12 +32,12 @@ def prep_IO_Perf(file_path):
     queue_depths = 2 ** np.arange(11)
     zones = np.arange(1, 15, 1)
 
-    for dir in glob.glob(f'{file_path}/IO_Performance/data/bandwidth/*'): 
+    for dir in glob.glob(f'{file_path}/IO_Performance/data/throughput/*'): 
         dir = dir.split('/')[-1]
         os.makedirs(f"{file_path}/figures/IO_Perf/{dir}", exist_ok=True)
 
-        if(parse_fio_data(f'{file_path}/IO_Performance/data/bandwidth/{dir}', bw_data)):
-            plot_IO_Perf_bw(f'{file_path}/figures/IO_Perf/{dir}', bw_data, queue_depths)
+        if(parse_fio_data(f'{file_path}/IO_Performance/data/throughput/{dir}', bw_data)):
+            plot_IO_Perf_iops(f'{file_path}/figures/IO_Perf/{dir}', bw_data, queue_depths)
             plot_IO_Perf_lat(f'{file_path}/figures/IO_Perf/{dir}', bw_data, queue_depths)
 
     for dir in glob.glob(f'{file_path}/IO_Performance/data/active_zones/*'): 
