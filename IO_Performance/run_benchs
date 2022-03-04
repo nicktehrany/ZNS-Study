@@ -52,6 +52,24 @@ export DEV_SECT_SIZE
 export DEV_NUMA_NODE
 export PARTITION
 
-numactl -m $DEV_NUMA_NODE ./fio_throughput
-# numactl -m $DEV_NUMA_NODE ./fio_scaled_bandwidth
-# [[ "$ZONED" == "1" ]] && numactl -m $DEV_NUMA_NODE ./fio_active_zones || "Can only run fio_active_zones with a zoned device"
+PS3=$(printf "\nEnter the number for the benchmark to run: ")
+BENCHMARKS=("fio_throughput" "fio_scaled_bandwidth" "fio_active_zones")
+
+select benchmark in "${BENCHMARKS[@]}"
+do
+    if [[ -z "$benchmark" ]]; then
+        echo "Invalid Input."
+    elif [[ "$benchmark" == "${BENCHMARKS[0]}" ]]; then
+        echo "Running fio_throughput benchmark"
+        numactl -m $DEV_NUMA_NODE ./fio_throughput
+        break
+    elif [[ "$benchmark" == "${BENCHMARKS[1]}" ]]; then
+        echo "Running fio_scaled_bandwidth benchmark"
+        numactl -m $DEV_NUMA_NODE ./fio_scaled_bandwidth
+        break
+    elif [[ "$benchmark" == "${BENCHMARKS[2]}" ]]; then
+        echo "Running fio_active_zones benchmark"
+        [[ "$ZONED" == "1" ]] && numactl -m $DEV_NUMA_NODE ./fio_active_zones || "Can only run fio_active_zones with a zoned device"
+        break
+    fi
+done
