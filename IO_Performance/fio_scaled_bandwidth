@@ -5,7 +5,7 @@ set -e
 # We only run this benchmark on a regular block device device
 if [[ "$ZONED" -ne "0" ]]; then
     echo "Not a regular block device. Stopping." && exit
-else if [[ "$PARITION" -ne "0" ]]; then
+elif [[ "$PARTITION" -ne "0" ]]; then
     echo "Not a namespace." && exit
 fi
 
