@@ -163,7 +163,6 @@ def plot_IO_Perf_bw(file_path, data, block_sizes):
         elif '_randwrite_' in key:
             bw_randwrite[int(math.log2(int(value["jobs"][0]["job options"]["bs"][:-2])*1024)) - 12] = value["jobs"][0]["write"]["bw_mean"]/1024
         elif '_read_' in key:
-            print(value["jobs"][0]["job options"]["bs"][:-2]) 
             bw_read[int(math.log2(int(value["jobs"][0]["job options"]["bs"][:-2])*1024)) - 12] = value["jobs"][0]["read"]["bw_mean"]/1024
         elif '_randread_' in key:
             bw_randread[int(math.log2(int(value["jobs"][0]["job options"]["bs"][:-2])*1024)) - 12] = value["jobs"][0]["read"]["bw_mean"]/1024
@@ -173,12 +172,6 @@ def plot_IO_Perf_bw(file_path, data, block_sizes):
             bw_overwrite_rand[int(math.log2(int(value["jobs"][0]["job options"]["bs"][:-2])*1024)) - 12] = value["jobs"][0]["write"]["bw_mean"]/1024
 
     fig, ax = plt.subplots()
-    print(bw_write)
-    print(bw_randwrite)
-    print(bw_read)
-    print(bw_randread)
-    print(bw_overwrite)
-    print(bw_overwrite_rand)
 
     xticks=np.arange(0,6,1)
     ax.plot(xticks, bw_write, markersize=4, marker='x', label="write_seq")
