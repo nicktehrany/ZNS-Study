@@ -1,0 +1,33 @@
+#! /bin/bash
+
+set -e
+
+# We only run this benchmark on a regular block device device
+if [[ "$ZONED" -ne "0" ]]; then
+    echo "Not a regular block device. Stopping." && exit
+fi
+
+DATA_DIR="data/scaled_throughput/$DEV-$(date +"%Y_%m_%d_%I_%M_%p")"
+BS=("4Ki" "8Ki" "16Ki" "32Ki" "64Ki" "128Ki")
+RUNTIME="30s"
+RAMP_TIME="10s"
+SIZE=$(echo "scale=0;$DEV_SIZE*$DEV_SECT_SIZE" | bc)
+QUEUE_DEPTH=4
+
+mkdir -p $DATA_DIR
+cd $DATA_DIR
+
+for block_size in ${BS[@]}; do
+    echo "Running benchmarks with block size: $block_size"
+    fio --name=$(echo "${DEV}_randwrite_${block_size}_queue-depth-${QUEUE_DEPTH}") --output=$(echo "${DEV}_randwrite_${block_size}_queue-depth-${QUEUE_DEPTH}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --iodepth=$QUEUE_DEPTH --rw=randwrite --bs=$block_size --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE --ramp_time=$RAMP_TIME --time_based --percentile_list=50:95
+    fio --name=$(echo "${DEV}_write_${block_size}_queue-depth-${QUEUE_DEPTH}") --output=$(echo "${DEV}_write_${block_size}_queue-depth-${QUEUE_DEPTH}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --iodepth=$QUEUE_DEPTH --rw=write --bs=$block_size --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE --ramp_time=$RAMP_TIME --time_based --percentile_list=50:95
+
+    # Fill entire ns for reading
+    echo "Refilling entire namespace for read benchs"
+    fio --name=zns-fio --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --iodepth=4 --rw=write --bs=512K > /dev/null
+
+    fio --name=$(echo "${DEV}_read_${block_size}_queue-depth-${QUEUE_DEPTH}") --output=$(echo "${DEV}_read_${block_size}_queue-depth-${QUEUE_DEPTH}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --iodepth=$QUEUE_DEPTH --rw=read --bs=$BS --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE --ramp_time=$RAMP_TIME --time_based --percentile_list=50:95
+    fio --name=$(echo "${DEV}_randread_${block_size}_queue-depth-${QUEUE_DEPTH}") --output=$(echo "${DEV}_randread_${block_size}_queue-depth-${QUEUE_DEPTH}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --iodepth=$QUEUE_DEPTH --rw=randread --bs=$BS --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE --ramp_time=$RAMP_TIME --time_based --percentile_list=50:95
+    fio --name=$(echo "${DEV}_overwrite-seq_${block_size}_queue-depth-${QUEUE_DEPTH}") --output=$(echo "${DEV}_overwrite-seq_${block_size}_queue-depth-${QUEUE_DEPTH}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --iodepth=$QUEUE_DEPTH --rw=write --bs=$BS --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE --ramp_time=$RAMP_TIME --time_based --percentile_list=50:95
+    fio --name=$(echo "${DEV}_overwrite-rand_${block_size}_queue-depth-${QUEUE_DEPTH}") --output=$(echo "${DEV}_overwrite-rand_${block_size}_queue-depth-${QUEUE_DEPTH}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --ioengine=libaio --iodepth=$QUEUE_DEPTH --rw=randwrite --bs=$BS --runtime=$RUNTIME  --numa_cpu_nodes=$DEV_NUMA_NODE --ramp_time=$RAMP_TIME --time_based --percentile_list=50:95
+done
