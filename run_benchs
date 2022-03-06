@@ -20,7 +20,7 @@ if [[ ! -z "$(echo $DEV | grep -E 'nvme[0-9]+n[0-9]+p[0-9]+')" ]]; then
 
 elif [[ "$(cat /sys/block/$DEV/queue/zoned)" == "host-managed" ]]; then
     # Get the device information
-    DEV_INFO=($(../get_zoned_device_info $DEV | awk 'NF{ print $NF }'))
+    DEV_INFO=($(./get_zoned_device_info $DEV | awk 'NF{ print $NF }'))
 
     DEV_ZONE_CAP=${DEV_INFO[0]}
     DEV_ZONE_SIZE=${DEV_INFO[1]}
@@ -61,15 +61,15 @@ do
         echo "Invalid Input."
     elif [[ "$benchmark" == "${BENCHMARKS[0]}" ]]; then
         echo "Running fio_throughput benchmark"
-        numactl -m $DEV_NUMA_NODE ./fio_throughput
+        numactl -m $DEV_NUMA_NODE IO_Performance/fio_throughput
         break
     elif [[ "$benchmark" == "${BENCHMARKS[1]}" ]]; then
         echo "Running fio_scaled_bandwidth benchmark"
-        numactl -m $DEV_NUMA_NODE ./fio_scaled_bandwidth
+        numactl -m $DEV_NUMA_NODE IO_Performance/fio_scaled_bandwidth
         break
     elif [[ "$benchmark" == "${BENCHMARKS[2]}" ]]; then
         echo "Running fio_active_zones benchmark"
-        [[ "$ZONED" == "1" ]] && numactl -m $DEV_NUMA_NODE ./fio_active_zones || "Can only run fio_active_zones with a zoned device"
+        [[ "$ZONED" == "1" ]] && numactl -m $DEV_NUMA_NODE IO_Performance/fio_active_zones || "Can only run fio_active_zones with a zoned device"
         break
     fi
 done

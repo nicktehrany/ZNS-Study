@@ -5,6 +5,13 @@ import math
 import numpy as np
 import matplotlib.patches as mpatches
 
+plt.rc('font', size=12)          # controls default text sizes
+plt.rc('axes', titlesize=12)     # fontsize of the axes title
+plt.rc('axes', labelsize=12)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=12)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=12)    # fontsize of the tick labels
+plt.rc('legend', fontsize=12)    # legend fontsize
+
 def plot_IO_Perf_iops(file_path, data, queue_depths):
     iops_write = [None] * len(queue_depths)
     iops_write_stdev = [None] * len(queue_depths)
@@ -189,7 +196,7 @@ def plot_IO_Perf_bw(file_path, data, block_sizes):
     block_labels = [x[:-2] for x in block_sizes]
     ax.xaxis.set_ticklabels(block_labels)
     ax.set_ylim(bottom=0)
-    ax.set_ylabel("Bandwidth (MiB/s)")
+    ax.set_ylabel("Bandwidth (MiB/sec)")
     ax.set_xlabel("Block Size (KiB)")
     plt.savefig(f"{file_path}/scaled_bandwidth.pdf", bbox_inches="tight")
     plt.clf()
