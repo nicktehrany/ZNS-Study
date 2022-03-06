@@ -2,7 +2,7 @@
 
 set -e
 
-DATA_DIR="data/active_zones/$DEV-$(date +"%Y_%m_%d_%I_%M_%p")"
+DATA_DIR="IO-Performance/data/active_zones/$DEV-$(date +"%Y_%m_%d_%I_%M_%p")"
 SIZE=$(echo "scale=0;$DEV_ZONE_SIZE*$DEV_SECT_SIZE*$DEV_ZONES" | bc)
 ACTIZE_ZONES=($(seq 1 1 $DEV_MAX_ACTIVE_ZONES))
 QUEUE_DEPTH="32"

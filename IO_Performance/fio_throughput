@@ -2,7 +2,7 @@
 
 set -e
 
-DATA_DIR="data/throughput/$DEV-$(date +"%Y_%m_%d_%I_%M_%p")"
+DATA_DIR="/IO-Performance/data/throughput/$DEV-$(date +"%Y_%m_%d_%I_%M_%p")"
 QUEUE_DEPTHS=(1 2 4 8 16 32 64 128 256 512 1024)
 
 # fio would stop once ns is full hence we use zone size instead of capacity

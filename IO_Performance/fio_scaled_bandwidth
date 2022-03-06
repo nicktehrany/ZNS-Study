@@ -9,7 +9,7 @@ elif [[ "$PARTITION" -ne "0" ]]; then
     echo "Not a namespace." && exit
 fi
 
-DATA_DIR="data/scaled_bandwidth/$DEV-$(date +"%Y_%m_%d_%I_%M_%p")"
+DATA_DIR="IO-Performance/data/scaled_bandwidth/$DEV-$(date +"%Y_%m_%d_%I_%M_%p")"
 BS=("4Ki" "8Ki" "16Ki" "32Ki" "64Ki" "128Ki")
 RUNTIME="30s"
 RAMP_TIME="10s"
