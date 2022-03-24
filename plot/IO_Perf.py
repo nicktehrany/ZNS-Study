@@ -246,13 +246,15 @@ def plot_IO_Perf_concur_read_lat(file_path, data, numjobs):
     median_none = [None] * len(numjobs)
     tail_none = [None] * len(numjobs)
 
+    print(data)
     for key, value in data.items():
+        print(key)
         if '_mq-deadline_' in key:
-            median_deadline[int(value["jobs"][0]["job options"]["iodepth"]) - 1] = value["jobs"][0]["write"]["clat_ns"]["mean"]/1000
-            tail_deadline[int(value["jobs"][0]["job options"]["iodepth"]) - 1] = value["jobs"][0]["write"]["clat_ns"]["percentile"]["95.000000"]/1000
+            median_deadline[int(value["jobs"][0]["job options"]["iodepth"]) - 1] = value["jobs"][0]["read"]["clat_ns"]["mean"]/1000
+            tail_deadline[int(value["jobs"][0]["job options"]["iodepth"]) - 1] = value["jobs"][0]["read"]["clat_ns"]["percentile"]["95.000000"]/1000
         elif '_none_' in key:
-            median_none[int(value["jobs"][0]["job options"]["numjobs"]) - 1] = value["jobs"][0]["write"]["clat_ns"]["mean"]/1000
-            tail_none[int(value["jobs"][0]["job options"]["numjobs"]) - 1] = value["jobs"][0]["write"]["clat_ns"]["percentile"]["95.000000"]/1000
+            median_none[int(value["jobs"][0]["job options"]["numjobs"]) - 1] = value["jobs"][0]["read"]["clat_ns"]["mean"]/1000
+            tail_none[int(value["jobs"][0]["job options"]["numjobs"]) - 1] = value["jobs"][0]["read"]["clat_ns"]["percentile"]["95.000000"]/1000
 
     fig, ax = plt.subplots()
 
@@ -275,5 +277,5 @@ def plot_IO_Perf_concur_read_lat(file_path, data, numjobs):
     ax.set_ylim(bottom=0)
     ax.set_ylabel("Latency (usec)")
     ax.set_xlabel("Number of Outstanding I/Os")
-    plt.savefig(f"{file_path}/concur_write_seq_scheduler.pdf", bbox_inches="tight")
+    plt.savefig(f"{file_path}/concur_read_seq_scheduler.pdf", bbox_inches="tight")
     plt.clf()
