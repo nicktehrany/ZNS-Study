@@ -1,0 +1,31 @@
+#! /bin/bash
+
+set -e
+
+DATA_DIR="IO-Performance/data/concur_write_seq/$DEV-$(date +"%Y_%m_%d_%I_%M_%p")"
+SIZE="3z"
+OFF_INC="3z"
+NUMJOBS=($(seq 1 1 $DEV_MAX_ACTIVE_ZONES))
+RUNTIME="30s"
+BS="4Ki"
+RAMP_TIME="10s"
+
+mkdir -p $DATA_DIR
+cd $DATA_DIR
+
+# Run fio for each active zone setup
+for jobs in ${NUMJOBS[@]}; do
+    echo "Running benchmarks with number of jobs: $jobs"
+    blkzone reset /dev/$DEV # make sure ns is empty
+
+    # set new mq-deadline scheduler
+    echo mq-deadline | tee /sys/block/nvme2n2/queue/scheduler
+
+    fio --name=$(echo "${DEV}_mq-deadline_${BS}_nummjobs-${jobs}") --output=$(echo "${DEV}_mq-deadline_${BS}_numjobs-${jobs}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE offset_increment=$OFF_INC --ioengine=psync --zonemode=zbd --rw=write --bs=$BS --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE --ramp_time=$RAMP_TIME --group_reporting --numjobs=$jobs --percentile_list=50:95
+
+    blkzone reset /dev/$DEV # make sure ns is empty
+    # set new none scheduler
+    echo none | tee /sys/block/nvme2n2/queue/scheduler
+
+    fio --name=$(echo "${DEV}_none_${BS}_nummjobs-${jobs}") --output=$(echo "${DEV}_none_${BS}_numjobs-${jobs}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE offset_increment=$OFF_INC --ioengine=psync --zonemode=zbd --rw=write --bs=$BS --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE --ramp_time=$RAMP_TIME --group_reporting --numjobs=$jobs --percentile_list=50:95
+done
