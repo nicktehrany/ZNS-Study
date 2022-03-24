@@ -201,3 +201,79 @@ def plot_IO_Perf_bw(file_path, data, block_sizes):
     plt.savefig(f"{file_path}/scaled_bandwidth.pdf", bbox_inches="tight")
     plt.clf()
     fig = ax = None
+
+def plot_IO_Perf_concur_write_lat(file_path, data, numjobs):
+    median_deadline = [None] * len(numjobs)
+    tail_deadline = [None] * len(numjobs)
+    median_none = [None] * len(numjobs)
+    tail_none = [None] * len(numjobs)
+
+    for key, value in data.items():
+        if '_mq-deadline_' in key:
+            median_deadline[int(value["jobs"][0]["job options"]["numjobs"]) - 1] = value["jobs"][0]["write"]["clat_ns"]["mean"]/1000
+            tail_deadline[int(value["jobs"][0]["job options"]["numjobs"]) - 1] = value["jobs"][0]["write"]["clat_ns"]["percentile"]["95.000000"]/1000
+        elif '_none_' in key:
+            median_none[int(value["jobs"][0]["job options"]["numjobs"]) - 1] = value["jobs"][0]["write"]["clat_ns"]["mean"]/1000
+            tail_none[int(value["jobs"][0]["job options"]["numjobs"]) - 1] = value["jobs"][0]["write"]["clat_ns"]["percentile"]["95.000000"]/1000
+
+    fig, ax = plt.subplots()
+
+    ax.plot(numjobs, median_deadline, markersize=6, marker='x', color="orange")
+    ax.plot(numjobs, tail_deadline, markersize=6, marker='o', color="orange")
+    ax.plot(numjobs, median_none, markersize=6, marker='x', color="green")
+    ax.plot(numjobs, tail_none, markersize=6, marker='o', color="green")
+
+    # Creating the legend labels
+    handles = []
+    handles.append(mpatches.Patch(color="orange", label="mq-deadline"))
+    handles.append(mpatches.Patch(color="green", label="none"))
+    handles.append(plt.Line2D([], [], color="black", marker="x", label="median"))
+    handles.append(plt.Line2D([], [], color="black", marker="o", label="95%"))
+
+    fig.tight_layout()
+    ax.grid(which='major', linestyle='dashed', linewidth='1')
+    ax.set_axisbelow(True)
+    ax.legend(loc='best', handles=handles)
+    ax.set_ylim(bottom=0)
+    ax.set_ylabel("Latency (usec)")
+    ax.set_xlabel("Number of Concurrent Jobs")
+    plt.savefig(f"{file_path}/concur_write_seq_scheduler.pdf", bbox_inches="tight")
+    plt.clf()
+
+def plot_IO_Perf_concur_read_lat(file_path, data, numjobs):
+    median_deadline = [None] * len(numjobs)
+    tail_deadline = [None] * len(numjobs)
+    median_none = [None] * len(numjobs)
+    tail_none = [None] * len(numjobs)
+
+    for key, value in data.items():
+        if '_mq-deadline_' in key:
+            median_deadline[int(value["jobs"][0]["job options"]["iodepth"]) - 1] = value["jobs"][0]["write"]["clat_ns"]["mean"]/1000
+            tail_deadline[int(value["jobs"][0]["job options"]["iodepth"]) - 1] = value["jobs"][0]["write"]["clat_ns"]["percentile"]["95.000000"]/1000
+        elif '_none_' in key:
+            median_none[int(value["jobs"][0]["job options"]["numjobs"]) - 1] = value["jobs"][0]["write"]["clat_ns"]["mean"]/1000
+            tail_none[int(value["jobs"][0]["job options"]["numjobs"]) - 1] = value["jobs"][0]["write"]["clat_ns"]["percentile"]["95.000000"]/1000
+
+    fig, ax = plt.subplots()
+
+    ax.plot(numjobs, median_deadline, markersize=6, marker='x', color="orange")
+    ax.plot(numjobs, tail_deadline, markersize=6, marker='o', color="orange")
+    ax.plot(numjobs, median_none, markersize=6, marker='x', color="green")
+    ax.plot(numjobs, tail_none, markersize=6, marker='o', color="green")
+
+    # Creating the legend labels
+    handles = []
+    handles.append(mpatches.Patch(color="orange", label="mq-deadline"))
+    handles.append(mpatches.Patch(color="green", label="none"))
+    handles.append(plt.Line2D([], [], color="black", marker="x", label="median"))
+    handles.append(plt.Line2D([], [], color="black", marker="o", label="95%"))
+
+    fig.tight_layout()
+    ax.grid(which='major', linestyle='dashed', linewidth='1')
+    ax.set_axisbelow(True)
+    ax.legend(loc='best', handles=handles)
+    ax.set_ylim(bottom=0)
+    ax.set_ylabel("Latency (usec)")
+    ax.set_xlabel("Number of Outstanding I/Os")
+    plt.savefig(f"{file_path}/concur_write_seq_scheduler.pdf", bbox_inches="tight")
+    plt.clf()

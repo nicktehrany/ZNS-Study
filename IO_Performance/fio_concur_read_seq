@@ -1,0 +1,33 @@
+#! /bin/bash
+
+set -e
+
+DATA_DIR="IO_Performance/data/concur_read_seq/$DEV-$(date +"%Y_%m_%d_%I_%M_%p")"
+SIZE="3z"
+MQ_SIZE=$(echo "scale=0;$DEV_ZONE_SIZE*$DEV_SECT_SIZE*$DEV_ZONES" | bc)
+OFF_INC="3z"
+NUMJOBS=($(seq 1 1 $DEV_MAX_ACTIVE_ZONES))
+RUNTIME="30s"
+BS="4Ki"
+RAMP_TIME="10s"
+
+mkdir -p $DATA_DIR
+cd $DATA_DIR
+
+# Filling namespace for read benchmark
+fio --name=zns-fio --filename=/dev/$DEV --direct=1 --size=$MQ_SIZE --ioengine=libaio --iodepth=4 --rw=write --bs=512K --zonemode=zbd > /dev/null
+
+# Run fio for each active zone setup
+for jobs in ${NUMJOBS[@]}; do
+    echo "Running benchmarks with number of jobs: $jobs"
+
+    # set mq-deadline scheduler
+    echo mq-deadline | tee /sys/block/nvme2n2/queue/scheduler > /dev/null
+
+    fio --name=$(echo "${DEV}_mq-deadline_${BS}_iodepth-${jobs}") --output=$(echo "${DEV}_mq-deadline_${BS}_numjobs-${jobs}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$MQ_SIZE --ioengine=libaio --zonemode=zbd --rw=read --bs=$BS --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE --ramp_time=$RAMP_TIME --iodepth=$jobs --percentile_list=50:95
+
+    # set none scheduler
+    echo none | tee /sys/block/nvme2n2/queue/scheduler > /dev/null
+
+    fio --name=$(echo "${DEV}_none_${BS}_nummjobs-${jobs}") --output=$(echo "${DEV}_none_${BS}_numjobs-${jobs}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --offset_increment=$OFF_INC --ioengine=psync --zonemode=zbd --rw=read --bs=$BS --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE --ramp_time=$RAMP_TIME --group_reporting --numjobs=$jobs --percentile_list=50:95
+done

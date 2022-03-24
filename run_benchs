@@ -53,7 +53,7 @@ export DEV_NUMA_NODE
 export PARTITION
 
 PS3=$(printf "\nEnter the number for the benchmark to run: ")
-BENCHMARKS=("fio_throughput" "fio_scaled_bandwidth" "fio_active_zones" "fio_concur_write_seq")
+BENCHMARKS=("fio_throughput" "fio_scaled_bandwidth" "fio_active_zones" "fio_concur_write_seq" "fio_concur_read_seq")
 
 select benchmark in "${BENCHMARKS[@]}"
 do
@@ -74,6 +74,10 @@ do
     elif [[ "$benchmark" == "${BENCHMARKS[3]}" ]]; then
         echo "Running fio_concur_write_seq benchmark"
         numactl -m $DEV_NUMA_NODE IO_Performance/fio_concur_write_seq
+        break
+    elif [[ "$benchmark" == "${BENCHMARKS[4]}" ]]; then
+        echo "Running fio_concur_read_seq benchmark"
+        numactl -m $DEV_NUMA_NODE IO_Performance/fio_concur_read_seq
         break
     fi
 done
