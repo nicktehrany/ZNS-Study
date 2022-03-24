@@ -69,7 +69,7 @@ do
         break
     elif [[ "$benchmark" == "${BENCHMARKS[2]}" ]]; then
         echo "Running fio_active_zones benchmark"
-        [[ "$ZONED" == "1" ]] && numactl -m $DEV_NUMA_NODE IO_Performance/fio_active_zones || "Can only run fio_active_zones with a zoned device"
+        [[ "$ZONED" == "1" ]] && numactl -m $DEV_NUMA_NODE IO_Performance/fio_active_zones || echo "Can only run fio_active_zones with a zoned device"
         break
     fi
 done

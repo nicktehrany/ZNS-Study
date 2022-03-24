@@ -2,7 +2,7 @@
 
 set -e
 
-DATA_DIR="/IO-Performance/data/throughput/$DEV-$(date +"%Y_%m_%d_%I_%M_%p")"
+DATA_DIR="IO_Performance/data/throughput/$DEV-$(date +"%Y_%m_%d_%I_%M_%p")"
 QUEUE_DEPTHS=(1 2 4 8 16 32 64 128 256 512 1024)
 
 # fio would stop once ns is full hence we use zone size instead of capacity
@@ -15,7 +15,7 @@ ZONED_RAND_ARGS=""
 if [[ "$ZONED" -eq "1" ]]; then
     SIZE=$(echo "scale=0;$DEV_ZONE_SIZE*$DEV_SECT_SIZE*$DEV_ZONES" | bc)
     ZONED_ARGS=" --zonemode=zbd "
-    ZONED_RAND_ARGS=" --max_open_zones=$DEV_MAX_ACTIVE_ZONES "
+    ZONED_RAND_ARGS=" $DEV_MAX_ACTIVE_ZONES "
 else
     SIZE=$(echo "scale=0;$DEV_SIZE*$DEV_SECT_SIZE" | bc)
 fi

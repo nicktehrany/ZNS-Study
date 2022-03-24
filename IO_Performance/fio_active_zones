@@ -2,10 +2,10 @@
 
 set -e
 
-DATA_DIR="IO-Performance/data/active_zones/$DEV-$(date +"%Y_%m_%d_%I_%M_%p")"
+DATA_DIR="IO_Performance/data/active_zones/$DEV-$(date +"%Y_%m_%d_%I_%M_%p")"
 SIZE=$(echo "scale=0;$DEV_ZONE_SIZE*$DEV_SECT_SIZE*$DEV_ZONES" | bc)
-ACTIZE_ZONES=($(seq 1 1 $DEV_MAX_ACTIVE_ZONES))
-QUEUE_DEPTH="32"
+ACTIVE_ZONES=($(seq 1 1 $DEV_MAX_ACTIVE_ZONES))
+QUEUE_DEPTH="16"
 RUNTIME="30s"
 BS="4Ki"
 RAMP_TIME="10s"
@@ -14,7 +14,7 @@ mkdir -p $DATA_DIR
 cd $DATA_DIR
 
 # Run fio for each active zone setup
-for zones in ${ACTIZE_ZONES[@]}; do
+for zones in ${ACTIVE_ZONES[@]}; do
     echo "Running benchmarks with number of active zones: $zones"
     blkzone reset /dev/$DEV # make sure ns is empty
 
