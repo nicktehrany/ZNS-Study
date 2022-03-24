@@ -39,47 +39,48 @@ def prep_IO_Perf(file_path):
 
     for dir in glob.glob(f'{file_path}/IO_Performance/data/throughput/*'): 
         dir = dir.split('/')[-1]
-        os.makedirs(f"{file_path}/figures/IO_Perf/{dir}", exist_ok=True)
+        os.makedirs(f"{file_path}/figures/IO_Perf/throughput/{dir}", exist_ok=True)
+        os.makedirs(f"{file_path}/figures/IO_Perf/loaded_latency/{dir}", exist_ok=True)
 
         if(parse_fio_data(f'{file_path}/IO_Performance/data/throughput/{dir}', bw_data)):
-            plot_IO_Perf_iops(f'{file_path}/figures/IO_Perf/{dir}', bw_data, queue_depths)
-            plot_IO_Perf_lat(f'{file_path}/figures/IO_Perf/{dir}', bw_data, queue_depths)
+            plot_IO_Perf_iops(f'{file_path}/figures/IO_Perf/throughput/{dir}', bw_data, queue_depths)
+            plot_IO_Perf_lat(f'{file_path}/figures/IO_Perf/loaded_latency/{dir}', bw_data, queue_depths)
 
     for dir in glob.glob(f'{file_path}/IO_Performance/data/active_zones/*'): 
         dir = dir.split('/')[-1]
-        os.makedirs(f"{file_path}/figures/IO_Perf/{dir}", exist_ok=True)
+        os.makedirs(f"{file_path}/figures/IO_Perf/active_zones/{dir}", exist_ok=True)
 
         if(parse_fio_data(f'{file_path}/IO_Performance/data/active_zones/{dir}', zone_data)):
-            plot_IO_Perf_act_zones(f'{file_path}/figures/IO_Perf/{dir}', zone_data, zones)
+            plot_IO_Perf_act_zones(f'{file_path}/figures/IO_Perf/active_zones/{dir}', zone_data, zones)
 
     for dir in glob.glob(f'{file_path}/IO_Performance/data/scaled_bandwidth/*'): 
         dir = dir.split('/')[-1]
-        os.makedirs(f"{file_path}/figures/IO_Perf/{dir}", exist_ok=True)
+        os.makedirs(f"{file_path}/figures/IO_Perf/scaled_bandwidth/{dir}", exist_ok=True)
 
         if(parse_fio_data(f'{file_path}/IO_Performance/data/scaled_bandwidth/{dir}', scaled_bw_data)):
-            plot_IO_Perf_bw(f'{file_path}/figures/IO_Perf/{dir}', scaled_bw_data, block_sizes)
+            plot_IO_Perf_bw(f'{file_path}/figures/IO_Perf/scaled_bandwidth/{dir}', scaled_bw_data, block_sizes)
 
     for dir in glob.glob(f'{file_path}/IO_Performance/data/concur_write_seq/*'): 
         dir = dir.split('/')[-1]
-        os.makedirs(f"{file_path}/figures/IO_Perf/{dir}", exist_ok=True)
+        os.makedirs(f"{file_path}/figures/IO_Perf/concur_write_seq/{dir}", exist_ok=True)
 
         if(parse_fio_data(f'{file_path}/IO_Performance/data/concur_write_seq/{dir}', concur_write_data)):
-            plot_IO_Perf_concur_write_lat(f'{file_path}/figures/IO_Perf/{dir}', concur_write_data, numjobs)
+            plot_IO_Perf_concur_write_lat(f'{file_path}/figures/IO_Perf/concur_write_seq/{dir}', concur_write_data, numjobs)
 
     for dir in glob.glob(f'{file_path}/IO_Performance/data/concur_read_seq/*'): 
         dir = dir.split('/')[-1]
-        os.makedirs(f"{file_path}/figures/IO_Perf/{dir}", exist_ok=True)
+        os.makedirs(f"{file_path}/figures/IO_Perf/concur_read_seq/{dir}", exist_ok=True)
 
         if(parse_fio_data(f'{file_path}/IO_Performance/data/concur_read_seq/{dir}', concur_bench_data)):
-            plot_IO_Perf_concur_read_lat(f'{file_path}/figures/IO_Perf/{dir}', concur_bench_data, numjobs)
+            plot_IO_Perf_concur_read_lat(f'{file_path}/figures/IO_Perf/concur_read_seq/{dir}', concur_bench_data, numjobs, "seq")
 
     concur_bench_data.clear()
     for dir in glob.glob(f'{file_path}/IO_Performance/data/concur_read_rand/*'): 
         dir = dir.split('/')[-1]
-        os.makedirs(f"{file_path}/figures/IO_Perf/{dir}", exist_ok=True)
+        os.makedirs(f"{file_path}/figures/IO_Perf/concur_read_rand/{dir}", exist_ok=True)
 
         if(parse_fio_data(f'{file_path}/IO_Performance/data/concur_read_rand/{dir}', concur_bench_data)):
-            plot_IO_Perf_concur_read_lat(f'{file_path}/figures/IO_Perf/{dir}', concur_bench_data, numjobs)
+            plot_IO_Perf_concur_read_lat(f'{file_path}/figures/IO_Perf/concur_read_rand/{dir}', concur_bench_data, numjobs, "rand")
 
 if __name__ == "__main__":
     file_path = '/'.join(os.path.abspath(__file__).split('/')[:-1])
