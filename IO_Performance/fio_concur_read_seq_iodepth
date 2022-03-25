@@ -6,7 +6,7 @@ DATA_DIR="IO_Performance/data/concur_read_seq_iodepth/$DEV-$(date +"%Y_%m_%d_%I_
 SIZE="3z"
 MQ_SIZE=$(echo "scale=0;$DEV_ZONE_SIZE*$DEV_SECT_SIZE*$DEV_ZONES" | bc)
 OFF_INC="3z"
-QUEUE_DEPTHS=(1 2 4 8 16 32 64 128 256 512 1024)
+QUEUE_DEPTHS=($(seq 1 1 $DEV_MAX_ACTIVE_ZONES))
 RUNTIME="30s"
 BS="4Ki"
 RAMP_TIME="10s"

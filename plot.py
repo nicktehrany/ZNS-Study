@@ -80,7 +80,7 @@ def prep_IO_Perf(file_path):
         os.makedirs(f"{file_path}/figures/IO_Perf/concur_read_seq_iodepth/{dir}", exist_ok=True)
 
         if(parse_fio_data(f'{file_path}/IO_Performance/data/concur_read_seq_iodepth/{dir}', concur_bench_data)):
-            plot_IO_Perf_concur_read_lat(f'{file_path}/figures/IO_Perf/concur_read_seq_iodepth/{dir}', concur_bench_data, queue_depths, "seq_iodepth")
+            plot_IO_Perf_concur_read_lat(f'{file_path}/figures/IO_Perf/concur_read_seq_iodepth/{dir}', concur_bench_data, numjobs, "seq_iodepth")
 
     concur_bench_data.clear()
     for dir in glob.glob(f'{file_path}/IO_Performance/data/concur_read_rand/*'): 

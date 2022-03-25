@@ -247,13 +247,10 @@ def plot_IO_Perf_concur_read_lat(file_path, data, numjobs, type):
     tail_none = [None] * len(numjobs)
 
     for key, value in data.items():
-        if '_iodepth' in type: # fio_concur_read_seq_iodepth
-                index = int(math.log2(int(value["jobs"][0]["job options"]["iodepth"])))
-        else: # fio_concur_read_seq
-            if 'none' in key:
-                index = int(value["jobs"][0]["job options"]["numjobs"]) - 1
-            else:
-                index = int(value["jobs"][0]["job options"]["iodepth"]) - 1
+        if 'none' in key:
+            index = int(value["jobs"][0]["job options"]["numjobs"]) - 1
+        else:
+            index = int(value["jobs"][0]["job options"]["iodepth"]) - 1
 
         if '_mq-deadline_' in key:
             median_deadline[index] = value["jobs"][0]["read"]["clat_ns"]["percentile"]["50.000000"]/1000
