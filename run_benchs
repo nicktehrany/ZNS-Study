@@ -53,7 +53,7 @@ export DEV_NUMA_NODE
 export PARTITION
 
 PS3=$(printf "\nEnter the number for the benchmark to run: ")
-BENCHMARKS=("fio_throughput" "fio_scaled_bandwidth" "fio_active_zones" "fio_concur_write_seq" "fio_concur_read_seq" "fio_concur_read_rand")
+BENCHMARKS=("fio_throughput" "fio_scaled_bandwidth" "fio_active_zones" "fio_concur_write_seq" "fio_concur_read_seq" "fio_concur_read_seq_iodepth" "fio_concur_read_rand")
 
 select benchmark in "${BENCHMARKS[@]}"
 do
@@ -80,6 +80,10 @@ do
         [[ "$ZONED" == "1" ]] && numactl -m $DEV_NUMA_NODE IO_Performance/fio_concur_read_seq || echo "Can only run benchmark with a zoned device"
         break
     elif [[ "$benchmark" == "${BENCHMARKS[5]}" ]]; then
+        echo "Running fio_concur_read_seq_iodepth benchmark"
+        [[ "$ZONED" == "1" ]] && numactl -m $DEV_NUMA_NODE IO_Performance/fio_concur_read_seq_iodepth || echo "Can only run benchmark with a zoned device"
+        break
+    elif [[ "$benchmark" == "${BENCHMARKS[6]}" ]]; then
         echo "Running fio_concur_read_rand benchmark"
         [[ "$ZONED" == "1" ]] && numactl -m $DEV_NUMA_NODE IO_Performance/fio_concur_read_rand || echo "Can only run benchmark with a zoned device"
         break
