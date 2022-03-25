@@ -227,8 +227,8 @@ def plot_IO_Perf_concur_write_lat(file_path, data, numjobs):
     handles = []
     handles.append(mpatches.Patch(color="orange", label="mq-deadline"))
     handles.append(mpatches.Patch(color="green", label="none"))
-    handles.append(plt.Line2D([], [], color="black", marker="x", label="median"))
-    handles.append(plt.Line2D([], [], color="black", marker="o", label="95%"))
+    handles.append(plt.Line2D([], [], color="black", marker="x", label="median", linewidth=0))
+    handles.append(plt.Line2D([], [], color="black", marker="o", label="95%", linewidth=0))
 
     fig.tight_layout()
     ax.grid(which='major', linestyle='dashed', linewidth='1')
@@ -247,12 +247,23 @@ def plot_IO_Perf_concur_read_lat(file_path, data, numjobs, type):
     tail_none = [None] * len(numjobs)
 
     for key, value in data.items():
+        if '_iodepth' in type: # fio_concur_read_seq_iodepth
+                index = int(math.log2(int(value["jobs"][0]["job options"]["iodepth"])))
+        else: # fio_concur_read_seq
+            if 'none' in key:
+                index = int(value["jobs"][0]["job options"]["numjobs"]) - 1
+            else:
+                index = int(value["jobs"][0]["job options"]["iodepth"]) - 1
+
         if '_mq-deadline_' in key:
-            median_deadline[int(value["jobs"][0]["job options"]["iodepth"]) - 1] = value["jobs"][0]["read"]["clat_ns"]["percentile"]["50.000000"]/1000
-            tail_deadline[int(value["jobs"][0]["job options"]["iodepth"]) - 1] = value["jobs"][0]["read"]["clat_ns"]["percentile"]["95.000000"]/1000
+            median_deadline[index] = value["jobs"][0]["read"]["clat_ns"]["percentile"]["50.000000"]/1000
+            tail_deadline[index] = value["jobs"][0]["read"]["clat_ns"]["percentile"]["95.000000"]/1000
+        elif '_none_' in key and type == 'seq_iodepth':
+            median_none[index] = value["jobs"][0]["read"]["clat_ns"]["percentile"]["50.000000"]/1000
+            tail_none[index] = value["jobs"][0]["read"]["clat_ns"]["percentile"]["95.000000"]/1000
         elif '_none_' in key:
-            median_none[int(value["jobs"][0]["job options"]["numjobs"]) - 1] = value["jobs"][0]["read"]["clat_ns"]["percentile"]["50.000000"]/1000
-            tail_none[int(value["jobs"][0]["job options"]["numjobs"]) - 1] = value["jobs"][0]["read"]["clat_ns"]["percentile"]["95.000000"]/1000
+            median_none[index] = value["jobs"][0]["read"]["clat_ns"]["percentile"]["50.000000"]/1000
+            tail_none[index] = value["jobs"][0]["read"]["clat_ns"]["percentile"]["95.000000"]/1000
 
     fig, ax = plt.subplots()
 
@@ -274,6 +285,9 @@ def plot_IO_Perf_concur_read_lat(file_path, data, numjobs, type):
     ax.legend(loc='best', handles=handles)
     ax.set_ylim(bottom=0)
     ax.set_ylabel("Latency (usec)")
-    ax.set_xlabel("Number of Outstanding I/Os")
+    if 'iodepth' in type:
+        ax.set_xlabel("IOdepth")
+    else:
+        ax.set_xlabel("Number of Outstanding I/Os")
     plt.savefig(f"{file_path}/concur_read_{type}_scheduler.pdf", bbox_inches="tight")
     plt.clf()
