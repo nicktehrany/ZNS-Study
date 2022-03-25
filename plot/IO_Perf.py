@@ -247,7 +247,11 @@ def plot_IO_Perf_concur_read_lat(file_path, data, numjobs, type):
     tail_none = [None] * len(numjobs)
 
     for key, value in data.items():
-        if 'none' in key:
+        if '_none_' in key and not 'iodepth' in type:
+            index = int(value["jobs"][0]["job options"]["numjobs"]) - 1
+        elif 'iodepth' in type:
+            index = int(value["jobs"][0]["job options"]["iodepth"]) - 1
+        elif '_mq-deadline_' in type:
             index = int(value["jobs"][0]["job options"]["numjobs"]) - 1
         else:
             index = int(value["jobs"][0]["job options"]["iodepth"]) - 1
