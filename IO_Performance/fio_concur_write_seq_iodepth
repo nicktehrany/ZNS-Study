@@ -29,5 +29,5 @@ for jobs in ${NUMJOBS[@]}; do
     # set none scheduler
     echo none | tee /sys/block/nvme2n2/queue/scheduler > /dev/null
 
-    fio --name=$(echo "${DEV}_none_${BS}_nummjobs-${jobs}") --output=$(echo "${DEV}_none_${BS}_numjobs-${jobs}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --offset_increment=$OFF_INC --ioengine=psync --zonemode=zbd --rw=write --bs=$BS --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE --ramp_time=$RAMP_TIME --numjobs=$jobs --time_based --percentile_list=50:95:99:99.9:99.99:99.999:99.9999:99.99999:100
+    fio --name=$(echo "${DEV}_none_${BS}_nummjobs-${jobs}") --output=$(echo "${DEV}_none_${BS}_numjobs-${jobs}.json") --output-format=json --filename=/dev/$DEV --direct=1 --size=$SIZE --offset_increment=$OFF_INC --ioengine=psync --zonemode=zbd --rw=write --bs=$BS --runtime=$RUNTIME --numa_cpu_nodes=$DEV_NUMA_NODE --ramp_time=$RAMP_TIME --numjobs=$jobs --time_based --group_reporting --percentile_list=50:95:99:99.9:99.99:99.999:99.9999:99.99999:100
 done
