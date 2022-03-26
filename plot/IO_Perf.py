@@ -237,7 +237,7 @@ def plot_IO_Perf_concur_write_lat(file_path, data, numjobs):
     ax.set_ylim(bottom=0)
     ax.set_ylabel("Latency (usec)")
     ax.set_xlabel("Number of Concurrent Jobs")
-    plt.savefig(f"{file_path}/concur_write_seq_scheduler.pdf", bbox_inches="tight")
+    plt.savefig(f"{file_path}/concur_write_seq.pdf", bbox_inches="tight")
     plt.clf()
 
 def plot_IO_Perf_concur_read_lat(file_path, data, numjobs, type):
@@ -290,5 +290,5 @@ def plot_IO_Perf_concur_read_lat(file_path, data, numjobs, type):
         ax.set_xlabel("IOdepth")
     else:
         ax.set_xlabel("Number of Outstanding I/Os")
-    plt.savefig(f"{file_path}/concur_read_{type}_scheduler.pdf", bbox_inches="tight")
+    plt.savefig(f"{file_path}/concur_read_{type}.pdf", bbox_inches="tight")
     plt.clf()
