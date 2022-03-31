@@ -202,19 +202,26 @@ def plot_IO_Perf_bw(file_path, data, block_sizes):
     plt.clf()
     fig = ax = None
 
-def plot_IO_Perf_concur_write_lat(file_path, data, numjobs):
+def plot_IO_Perf_concur_write_lat(file_path, data, numjobs, type):
     median_deadline = [None] * len(numjobs)
     tail_deadline = [None] * len(numjobs)
     median_none = [None] * len(numjobs)
     tail_none = [None] * len(numjobs)
+    if type == 'iodepth':
+        tail = "95.000000"
+    else:
+        tail = "95.000000"
 
     for key, value in data.items():
-        if '_mq-deadline_' in key:
+        if '_mq-deadline_' in key and type != 'iodepth':
             median_deadline[int(value["jobs"][0]["job options"]["numjobs"]) - 1] = value["jobs"][0]["write"]["clat_ns"]["percentile"]["50.000000"]/1000
-            tail_deadline[int(value["jobs"][0]["job options"]["numjobs"]) - 1] = value["jobs"][0]["write"]["clat_ns"]["percentile"]["95.000000"]/1000
+            tail_deadline[int(value["jobs"][0]["job options"]["numjobs"]) - 1] = value["jobs"][0]["write"]["clat_ns"]["percentile"][tail]/1000
+        elif '_mq-deadline_' in key and type == 'iodepth':
+            median_deadline[int(value["jobs"][0]["job options"]["iodepth"]) - 1] = value["jobs"][0]["write"]["clat_ns"]["percentile"]["50.000000"]/1000
+            tail_deadline[int(value["jobs"][0]["job options"]["iodepth"]) - 1] = value["jobs"][0]["write"]["clat_ns"]["percentile"][tail]/1000
         elif '_none_' in key:
             median_none[int(value["jobs"][0]["job options"]["numjobs"]) - 1] = value["jobs"][0]["write"]["clat_ns"]["percentile"]["50.000000"]/1000
-            tail_none[int(value["jobs"][0]["job options"]["numjobs"]) - 1] = value["jobs"][0]["write"]["clat_ns"]["percentile"]["95.000000"]/1000
+            tail_none[int(value["jobs"][0]["job options"]["numjobs"]) - 1] = value["jobs"][0]["write"]["clat_ns"]["percentile"][tail]/1000
 
     fig, ax = plt.subplots()
 
@@ -228,7 +235,7 @@ def plot_IO_Perf_concur_write_lat(file_path, data, numjobs):
     handles.append(mpatches.Patch(color="orange", label="mq-deadline"))
     handles.append(mpatches.Patch(color="green", label="none"))
     handles.append(plt.Line2D([], [], color="black", marker="x", label="median", linewidth=0))
-    handles.append(plt.Line2D([], [], color="black", marker="o", label="95%", linewidth=0))
+    handles.append(plt.Line2D([], [], color="black", marker="o", label=f"{tail}%", linewidth=0))
 
     fig.tight_layout()
     ax.grid(which='major', linestyle='dashed', linewidth='1')
@@ -236,8 +243,11 @@ def plot_IO_Perf_concur_write_lat(file_path, data, numjobs):
     ax.legend(loc='best', handles=handles)
     ax.set_ylim(bottom=0)
     ax.set_ylabel("Latency (usec)")
-    ax.set_xlabel("Number of Concurrent Jobs")
-    plt.savefig(f"{file_path}/concur_write_seq.pdf", bbox_inches="tight")
+    if type =='iodepth':
+        ax.set_xlabel("Number of Outstanding I/Os")
+    else:
+        ax.set_xlabel("Number of Concurrent Jobs")
+    plt.savefig(f"{file_path}/concur_write_seq_iodepth.pdf", bbox_inches="tight")
     plt.clf()
 
 def plot_IO_Perf_concur_read_lat(file_path, data, numjobs, type):

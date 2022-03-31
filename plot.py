@@ -65,7 +65,15 @@ def prep_IO_Perf(file_path):
         os.makedirs(f"{file_path}/figures/IO_Perf/concur_write_seq/{dir}", exist_ok=True)
 
         if(parse_fio_data(f'{file_path}/IO_Performance/data/concur_write_seq/{dir}', concur_write_data)):
-            plot_IO_Perf_concur_write_lat(f'{file_path}/figures/IO_Perf/concur_write_seq/{dir}', concur_write_data, numjobs)
+            plot_IO_Perf_concur_write_lat(f'{file_path}/figures/IO_Perf/concur_write_seq/{dir}', concur_write_data, numjobs, "seq")
+
+    concur_write_data.clear()
+    for dir in glob.glob(f'{file_path}/IO_Performance/data/concur_write_seq_iodepth/*'): 
+        dir = dir.split('/')[-1]
+        os.makedirs(f"{file_path}/figures/IO_Perf/concur_write_seq_iodepth/{dir}", exist_ok=True)
+
+        if(parse_fio_data(f'{file_path}/IO_Performance/data/concur_write_seq_iodepth/{dir}', concur_write_data)):
+            plot_IO_Perf_concur_write_lat(f'{file_path}/figures/IO_Perf/concur_write_seq_iodepth/{dir}', concur_write_data, numjobs, "iodepth")
 
     for dir in glob.glob(f'{file_path}/IO_Performance/data/concur_read_seq/*'): 
         dir = dir.split('/')[-1]
