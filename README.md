@@ -32,7 +32,7 @@ $ echo mq-deadline | sudo tee /sys/block/nvme2n2/queue/scheduler
 $ sudo fio --name=zns-fio --filename=/dev/nvme2n3 --direct=1 --size=$((4194304*512*`cat /sys/block/nvme2n3/queue/nr_zones`)) --ioengine=libaio --zonemode=zbd --iodepth=8 --rw=write --bs=512K
 
 # Fill conventional SSD free space with cold data
-$ sudo fio --name=zns-fio --filename=/dev/nvme0np1 --direct=1 --size=2T --ioengine=libaio --iodepth=8 --rw=write --bs=512K
+$ sudo fio --name=zns-fio --filename=/dev/nvme0np2 --direct=1 --size=2T --ioengine=libaio --iodepth=8 --rw=write --bs=512K
 ```
 
 This already sets the mq-deadline scheduler, some of the experiments that benchmark different schedulers will change them.
