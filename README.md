@@ -63,6 +63,8 @@ Running `python3 plot.py` in the root directory of this repo will create plots f
 
 From the existing data we have three devices:
 
-- `nvme0n1p1`, which is a 100GB namespace on a Samsung EVO 2TB SSD
+- `nvme0n1p1`, which is a 100GB parition on a Samsung EVO 2TB SSD
 - `nvme1n1p2`, which is a 100GB partition on an Optane SSD
 - `nvme2n2`, which is a 50 zone (100GB size, ~51GB capacity) namespace on a NVMe ZNS SSD
+
+The conventional SSDs only support a single namespace, hence here we utilize partitions, whereas the ZNS device supports multiple namespaces.
