@@ -1,6 +1,6 @@
 # ZNS-Study
 
-This repository contains all running scripts for the benchmarks run in the evaluation of NVMe ZNS devices. It additionally contains plotting scripts, as well as collected data and figures.
+This repository contains all running scripts for the benchmarks run in the evaluation of NVMe ZNS devices. It additionally contains plotting scripts, as well as collected data and figures. The final paper of this evaluation is also present in this repository [here](Towards_an_Unwritten_Contract_of_NVMe_ZNS_SSD.pdf)
 
 Requirements:
 
