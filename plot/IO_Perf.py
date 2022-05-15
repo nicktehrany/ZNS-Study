@@ -235,7 +235,7 @@ def plot_IO_Perf_concur_write_lat(file_path, data, numjobs, type):
     handles.append(mpatches.Patch(color="orange", label="mq-deadline"))
     handles.append(mpatches.Patch(color="green", label="none"))
     handles.append(plt.Line2D([], [], color="black", marker="x", label="median", linewidth=0))
-    handles.append(plt.Line2D([], [], color="black", marker="o", label=f"{tail}%", linewidth=0))
+    handles.append(plt.Line2D([], [], color="black", marker="o", label=f"95%", linewidth=0))
 
     fig.tight_layout()
     ax.grid(which='major', linestyle='dashed', linewidth='1')
