@@ -243,11 +243,11 @@ def plot_IO_Perf_concur_write_lat(file_path, data, numjobs, type):
     ax.legend(loc='best', handles=handles)
     ax.set_ylim(bottom=0)
     ax.set_ylabel("Latency (usec)")
-    if type =='iodepth':
-        ax.set_xlabel("Number of Outstanding I/Os")
+    ax.set_xlabel("Number of Outstanding I/Os")
+    if type == "seq":
+        plt.savefig(f"{file_path}/concur_write_seq.pdf", bbox_inches="tight")
     else:
-        ax.set_xlabel("Number of Concurrent Jobs")
-    plt.savefig(f"{file_path}/concur_write_seq_iodepth.pdf", bbox_inches="tight")
+        plt.savefig(f"{file_path}/concur_write_seq_iodepth.pdf", bbox_inches="tight")
     plt.clf()
 
 def plot_IO_Perf_concur_read_lat(file_path, data, numjobs, type):
@@ -297,7 +297,7 @@ def plot_IO_Perf_concur_read_lat(file_path, data, numjobs, type):
     ax.set_ylim(bottom=0)
     ax.set_ylabel("Latency (usec)")
     if 'iodepth' in type:
-        ax.set_xlabel("IOdepth")
+        ax.set_xlabel("I/O Queue Depth")
     else:
         ax.set_xlabel("Number of Outstanding I/Os")
     plt.savefig(f"{file_path}/concur_read_{type}.pdf", bbox_inches="tight")
