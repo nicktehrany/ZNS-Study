@@ -9,9 +9,9 @@ documentation of ZNS devices also consult the [Official ZNS Documentation](https
 
 ## Requirements
 
-ZNS devices and this evaluation requires several libraries and tools to be installed, *Important to note is that ZNS
+ZNS devices and this evaluation requires several libraries and tools to be installed, **Important to note**, ZNS
 support is very new in the majority of projects, thus ensure that versions are as new as possible and up to date with
-the master branch*
+the master branch
 
 - Linux Kernel 5.9+ (for ZNS support)
 - [libnvme](https://github.com/linux-nvme/libnvme)
@@ -85,7 +85,7 @@ $ cat/sys/block/nvme2n1/device/numa_node
 
 f2fs has support for zoned storage devices added. Using `mkfs.f2fs` (from `f2fs-tools`, make sure its version is at
 least equal to 1.14.0) the ZNS zoned namespace can be formatted with the f2fs file system and mounted. However, f2fs
-requires an additional regular randomly writable block device for its superblock and write caching. Additionally, both
+requires an additional regular randomly writable block device for its superblock, NAT table, etc. Additionally, both
 devices have to be configured to the same sector size (512B in our case).
 
 ```bash
@@ -148,4 +148,4 @@ make sure the correct device is specified.
 ## Plotting
 
 Running `python3 plot.py` in the root directory of this repo will create plots for all data that exists in the repo.
-These will appear in the `figures` directory under the respective benchmark and device names.
+These will appear in the `,figures` directory under the respective benchmark and device names.
