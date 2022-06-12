@@ -2,12 +2,12 @@
 
 This repository contains all running scripts for the benchmarks used in the evaluation of NVMe ZNS devices. It
 additionally contains plotting scripts, as well as collected datasets and figures. The technical report for this
-evaluation is available //TODO: link report once published
+evaluation is available on [arxiv](https://arxiv.org/abs/2206.01547).
 
 This README contains a collection of commands and instructions for setting up of ZNS devices. For a detailed
 documentation of ZNS devices also consult the [Official ZNS Documentation](https://zonedstorage.io/docs/introduction).
 
-## Requirements:
+## Requirements
 
 ZNS devices and this evaluation requires several libraries and tools to be installed, *Important to note is that ZNS
 support is very new in the majority of projects, thus ensure that versions are as new as possible and up to date with
@@ -45,13 +45,13 @@ correct scheduler to be set (for detailed scheduling information see the backgro
 
 ```bash
 # Create a 4GiB conventional namespace, size is given in 512B sectors
-sudo nvme create-ns /dev/nvme2 -s 8388608 -c 8388608 -b 512 --csi=0
+$ sudo nvme create-ns /dev/nvme2 -s 8388608 -c 8388608 -b 512 --csi=0
 
 # Create a 100GiB conventional namespace, note the csi changed to zoned
 $ sudo nvme create-ns /dev/nvme2 -s 209715200 -c 209715200 -b 512 --csi=2
 
 # Attach all namespaces to same controller (adapt -n argument with ns id)
-sudo nvme attach-ns /dev/nvme2 -n 1 -c 0
+$ sudo nvme attach-ns /dev/nvme2 -n 1 -c 0
 
 # Set the correct scheduler for the zoned namespaces (adapt device path for each ns)
 $ echo mq-deadline | sudo tee /sys/block/nvme2n2/queue/scheduler
