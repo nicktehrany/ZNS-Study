@@ -1,3 +1,5 @@
+#! /usr/bin/python3
+
 from plot.IO_Perf import * 
 import os
 import glob
